@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>sqscripter.fun</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 64px;
+      margin: 40px 0 10px;
+    }
+
+    .info {
+      max-width: 700px;
+      margin: 0 auto 60px;
+      padding: 0 20px;
+      font-size: 18px;
+      color: #555;
+    }
+
+    .top-projects {
+      display: flex;
+      justify-content: center;
+      gap: 40px;
+      margin-bottom: 80px;
+    }
+
+    .top-project {
+      width: 150px;
+      height: 150px;
+      border-radius: 12px;
+      background: white;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      transition: 0.2s;
+    }
+
+    .top-project img {
+      width: 60%;
+      object-fit: contain;
+    }
+
+    .top-project.gold {
+      box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.6);
+      order: 2;
+      transform: translateY(-20px);
+    }
+
+    .top-project.silver {
+      box-shadow: 0 0 10px 4px rgba(192, 192, 192, 0.5);
+      order: 1;
+      transform: translateY(-10px);
+    }
+
+    .top-project.bronze {
+      box-shadow: 0 0 10px 4px rgba(205, 127, 50, 0.5);
+      order: 3;
+      transform: translateY(-5px);
+    }
+
+    .posts {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      padding: 0 20px 100px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .page-link {
+      display: inline-block;
+      width: 150px;
+      height: 150px;
+      background-color: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .page-link:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+    }
+
+    .page-link-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+  </style>
+</head>
+<body>
+
+<h1>sqscripter.fun</h1>
+
+<div class="info">
+  Welcome to my little playground of random, funny, pointless, and sometimes cursed projects.  
+  This is where I keep all the weird experiments I build for fun.  
+</div>
+
+<!-- Top 3 Projects Podium -->
+<div class="top-projects">
+  <a href="/cookie-clicker/" class="top-project gold">
+    <img src="/images/PilorThumb.png alt="Pilor">
+  </a>
+  <a href="/html-compiler/" class="top-project silver">
+    <img src="/link-images/html-compiler.svg" alt="HTML Compiler">
+  </a>
+  <a href="/random-tool/" class="top-project bronze">
+    <img src="/link-images/random-tool.svg" alt="Random Tool">
+  </a>
+</div>
+
+<!-- Project Grid -->
+<div class="posts">
+  <a href="/cookie-clicker/" class="page-link">
+    <img src="/link-images/cookie-clicker.svg" alt="Cookie Clicker Clone" class="page-link-img" />
+  </a>
+  <a href="/html-compiler/" class="page-link">
+    <img src="/link-images/html-compiler.svg" alt="HTML Compiler" class="page-link-img" />
+  </a>
+  <a href="/random-tool/" class="page-link">
+    <img src="/link-images/random-tool.svg" alt="Random Tool" class="page-link-img" />
+  </a>
+  <a href="/sandbox/" class="page-link">
+    <img src="/link-images/sandbox.svg" alt="Sandbox" class="page-link-img" />
+  </a>
+  <a href="/weird-experiment/" class="page-link">
+    <img src="/link-images/weird-experiment.svg" alt="Weird Experiment" class="page-link-img" />
+  </a>
+</div>
+
+</body>
+</html>
