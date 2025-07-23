@@ -66,7 +66,13 @@
 
      
 
-    
+      iframe {
+        width: 50%;
+        height: 100%;
+        border: none;
+        background: #fff;
+      }
+
       #editor {
   width: 50%;
   height: 100%; /* Set a fixed height */
@@ -78,7 +84,11 @@
   /* Prevent any unexpected resizing */
 }
 
-
+.CodeMirror {
+  height: 100% !important; /* Ensures it stays within #editor */
+  
+  white-space: pre-wrap; /* Wrap text properly */
+}
 
       .CodeMirror-focused {
         outline: none !important;
@@ -109,23 +119,45 @@
     height: 40px;
     width: auto;
 }
+#container {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 60px);
+  padding: 20px;
+  box-sizing: border-box;
+  min-height: 0; /* Add this */
+}
+
 #editor-preview-container {
   display: flex;
   flex: 1;
   margin-bottom: 20px;
-  min-height: 0;
+  min-height: 0; /* Add this */
 }
 
-#editor, iframe {
+#editor {
   width: 50%;
   height: 100%;
-  overflow-y: auto;
+  background: #1a1a1a;
+  padding: 20px;
+  box-sizing: border-box;
+  border-right: 2px solid #555;
+  overflow: auto; /* better scrolling */
+  flex-shrink: 0; /* prevent shrinking */
+}
+
+iframe {
+  width: 50%;
+  height: 100%;
+  border: none;
+  background: #fff;
+  flex-shrink: 0;
 }
 
 .CodeMirror {
   height: 100% !important;
   white-space: pre-wrap;
-  overflow-y: auto;
+  min-height: 0; /* ensure it doesn't grow */
 }
 
     </style>
