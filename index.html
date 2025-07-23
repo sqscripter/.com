@@ -40,41 +40,55 @@
     }
 
     .top-project {
-      width: 30%;
-      height: 200px;
+      width: 27vw;
+      height: 15.5vw;
       border-radius: 12px;
-      background: white;
+      background: rgb(255, 255, 255);
       box-shadow: 0 4px 20px rgba(0,0,0,0.05);
       display: flex;
       align-items: center;
       justify-content: center;
       position: relative;
       transition: 0.2s;
+      
     }
-
+.top-project.gold:hover{
+  
+      box-shadow: 0 0 105px 5px rgba(255, 215, 0, 0.6);
+}
     .top-project img {
-      height:200px;
+      height:95;
       object-fit: contain;
+      border-radius: 10px;
+      
     }
 
     .top-project.gold {
       box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.6);
       order: 2;
       transform: translateY(-20px);
+      background-color: black;
     }
-
+ 
     .top-project.silver {
       box-shadow: 0 0 10px 4px rgba(192, 192, 192, 0.5);
       order: 1;
       transform: translateY(-10px);
+      background: rgb(53, 53, 170);
     }
-
+    .top-project.silver:hover{
+      
+      box-shadow: 0 0 105px 4px rgba(192, 192, 192, 0.5);
+    }
     .top-project.bronze {
       box-shadow: 0 0 10px 4px rgba(205, 127, 50, 0.5);
       order: 3;
       transform: translateY(-5px);
     }
-
+    .top-project.top-project.bronze:hover{
+      
+      box-shadow: 0 0 105px 4px rgba(205, 127, 50, 0.5);
+    }
     .posts {
       display: flex;
       flex-wrap: wrap;
@@ -116,6 +130,100 @@
 
 
 
+
+.button-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+}
+
+.glass-btn {
+  width: 100px;
+  height: 100px;
+  background-color: #fafafa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 7px;
+  margin-left: 1em;
+  margin-right: 1em;  
+  cursor: pointer;
+  transition: all 0.3s;
+
+  &.blue-btn {
+    -webkit-box-shadow: 0px 20px 20px -17px rgba(255, 255, 255, 0.555);
+    -moz-box-shadow: 0px 20px 20px -17px rgba(255, 255, 255, 0.53);
+    box-shadow: 0px 20px 20px -17px rgba(255, 255, 255, 0.53);
+
+    &:hover {
+      -webkit-box-shadow: 0px 20px 35px -16px rgba(255, 255, 255, 0.65);
+      -moz-box-shadow: 0px 20px 35px -16px rgba(255, 255, 255, 0.65);
+      box-shadow: 0px 20px 35px -16px rgba(255, 255, 255, 0.65);      
+
+}
+
+    .content {
+      font-size: 4em;
+      font-family: "Roboto", sans-serif;
+      background: linear-gradient(to right, #006fff, #00acff 70%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0px 10px 37px rgba(0, 111, 255, 0.8);
+    }
+  }
+
+  &.red-btn {
+    -webkit-box-shadow: 0px 20px 20px -17px rgba(255, 16, 39, 0.5);
+    -moz-box-shadow: 0px 20px 20px -17px rgba(255, 16, 39, 0.5);
+    box-shadow: 0px 20px 20px -17px rgba(255, 16, 39, 0.5);
+
+    &:hover {
+      -webkit-box-shadow: 0px 20px 35px -16px rgba(255, 16, 39, 0.57);
+      -moz-box-shadow: 0px 20px 35px -16px rgba(255, 16, 39, 0.57);
+      box-shadow: 0px 20px 35px -16px rgba(255, 16, 39, 0.57);      
+    }
+
+    .content {
+      font-size: 4em;
+      font-family: "Roboto", sans-serif;
+      background: linear-gradient(to right, #ff1027, #ff4f06 70%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0px 10px 37px rgba(255, 16, 39, 0.6);
+    }
+  }
+
+  &.amber-btn {
+    -webkit-box-shadow: 0px 20px 20px -17px rgba(255, 159, 16, 0.53);
+    -moz-box-shadow: 0px 20px 20px -17px rgba(255, 159, 16, 0.53);
+    box-shadow: 0px 20px 20px -17px rgba(255, 159, 16, 0.53);
+
+    &:hover {
+      -webkit-box-shadow: 0px 20px 35px -16px rgba(255, 159, 16, 0.6);
+      -moz-box-shadow: 0px 20px 35px -16px rgba(255, 159, 16, 0.6);
+      box-shadow: 0px 20px 35px -16px rgba(255, 159, 16, 0.6);      
+    }
+
+    .content {
+      font-size: 4em;
+      font-family: "Roboto", sans-serif;
+      background: linear-gradient(to right, #ff8d00, #f7ad07 70%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      text-shadow: 0px 10px 37px rgba(255, 94, 16, 0.7);
+    }
+  }
+
+  &:hover {
+    background-color: darken(#fafafa, 2%);    
+    transform: translateY(-5px);
+    transition: all 0.3s;
+  }
+}
+#toplogo{
+
+}
   </style>
   <link
   rel="stylesheet"
@@ -126,7 +234,7 @@
 </head>
 <body>
 
-<h1>sqscripter.com</h1>
+<img src="images/sqscripter.png" class="toplogo">
 
 <div class="info">
   My silly little project page
@@ -134,11 +242,11 @@
 
 <!-- Top 3 Projects Podium -->
 <div class="top-projects">
-  <a href="/cookie-clicker/" class="top-project gold">
+  <a href="/Pilor/" class="top-project gold">
     <img src="images/PilorThumb.png" alt="Pilor">
   </a>
-  <a href="/html-compiler/" class="top-project silver">
-    <img src="images/CalendarThumb" alt="Minimalistic Calendar">
+  <a href="/MinimalCalendar/" class="top-project silver">
+    <img src="images/MinimalCalendarThumb.png" alt="Minimalistic Calendar">
   </a>
   <a href="/random-tool/" class="top-project bronze">
     <img src="images/CookieThumb" alt="Cookie Clicker">
@@ -164,6 +272,28 @@
   </a>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
-
+<footer><div class="button-container">
+  
+  <div class="glass-btn blue-btn">
+    <!--<div class="content">
+      h
+    </div> -->
+    <a href="https://github.com/sqscripter">
+    <img src="images/githublogo.png" alt="github" style="width: 5.5em;"></a>
+  </div>
+<!--
+  <div class="glass-btn red-btn">
+     <a href="youtube.com"></a>
+    <img src="https://i.postimg.cc/LstJ4Hhf/youtube.png" alt="youtube" style="width: 6em;">
+  </div>
+  
+  <div class="glass-btn amber-btn">
+     <div class="content">
+      y
+    </div> 
+    <img src="https://i.postimg.cc/tgQ1H1Rp/soundcloud.png" alt="soundcloud" style="width: 6em;">
+  </div>
+-->
+</div></footer>
 </body>
 </html>
