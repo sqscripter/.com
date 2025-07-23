@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimalist Calendar</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: var(--bg-color, #f4f4f4);
+            transition: background 0.3s;
+        }
+        .calendar {
+            width: 90%;
+            max-width: 600px;
+            background: var(--calendar-bg, white);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: background 0.3s;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+        .day {
+            background: var(--day-bg, #eee);
+            padding: 15px;
+            border-radius: 5px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+        }
+        .day:hover {
+            background: var(--day-hover, #ddd);
+        }
+        .event-preview {
+            margin-top: 5px;
+            font-size: 0.8em;
+            color: var(--text-color, #666);
+            overflow: hidden;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            max-width: 100%;
+        }
+        .note-modal {
+            display: none;
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: var(--calendar-bg, white);
+            padding: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+            text-align: center;
+            transition: background 0.3s;
+        }
+        .note-modal.show {
+            display: block;
+        }
+        textarea {
+            width: 100%;
+            height: 100px;
+            margin-top: 10px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button {
+            margin-top: 10px;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .theme-selector {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="theme-selector">
+        <select id="theme" onchange="changeTheme()">
+            <option value="default">Default</option>
+            <option value="dark">Dark</option>
+            <option value="blue">Blue</option>
+            <option value="green">Green</option>
+            <option value="pink">Pink</option>
+            <option value="purple">Purple</option>
+            <option value="orange">Orange</option>
+            <option value="red">Red</option>
+            <option value="yellow">Yellow</option>
+            <option value="brown">Brown</option>
+            <option value="teal">Teal</option>
+            <option value="gray">Gray</option>
+            <option value="lavender">Lavender</option>
+            <option value="peach">Peach</option>
+            <option value="turquoise">Turtle</option>
+            <option value="mint">Thinmint</option>
+            <option value="beige">IDK</option>
+            <option value="violet">notConner</option>
+            <option value="coral">Orange²</option>
+            <option value="magenta">Grace on screen</option>
+            <option value="indigo">Mexico</option>
+            <option value="champagne">Banana Banana</option>
+            <option value="aqua">Unda Da Sea</option>
+            <option value="seafoam">Another Green</option>
+            <option value="sand">Leperchaun</option>
+            
+        </select>
+    </div>
+    <div class="calendar">
+        <div class="header">
+            <button onclick="prevMonth()">&#9665;</button>
+            <h2 id="month-year"></h2>
+            <button onclick="nextMonth()">&#9655;</button>
+        </div>
+        <div class="days" id="days"></div>
+    </div>
+    
+    <div class="note-modal" id="note-modal">
+        <h3 id="selected-day"></h3>
+        <textarea id="note-text"></textarea>
+        <button onclick="saveNote()">Save</button>
+        <button onclick="closeModal()">Close</button>
+    </div>
+
+    <script>
+        let currentDate = new Date();
+        let currentYear = currentDate.getFullYear();
+        let currentMonth = currentDate.getMonth();
+        let selectedDate = "";
+
+        function renderCalendar() {
+            document.getElementById("month-year").innerText = new Date(currentYear, currentMonth).toLocaleString('default', { month: 'long', year: 'numeric' });
+            const daysContainer = document.getElementById("days");
+            daysContainer.innerHTML = "";
+            let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+            for (let day = 1; day <= daysInMonth; day++) {
+                let dayElement = document.createElement("div");
+                dayElement.className = "day";
+                dayElement.innerHTML = `<span>${day}</span><div class='event-preview'></div>`;
+                let eventText = localStorage.getItem(`${currentYear}-${currentMonth + 1}-${day}`);
+                if (eventText) {
+                    dayElement.querySelector(".event-preview").innerText = eventText.slice(0, 10) + "...";
+                }
+                dayElement.onclick = () => openModal(day);
+                daysContainer.appendChild(dayElement);
+            }
+        }
+
+        function openModal(day) {
+            selectedDate = `${currentYear}-${currentMonth + 1}-${day}`;
+            document.getElementById("selected-day").innerText = `Notes for ${selectedDate}`;
+            document.getElementById("note-text").value = localStorage.getItem(selectedDate) || "";
+            document.getElementById("note-modal").classList.add("show");
+        }
+
+        function closeModal() {
+            document.getElementById("note-modal").classList.remove("show");
+        }
+
+        
+
+        function prevMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        }
+
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        }
+
+        function changeTheme() {
+            const themes = {
+                default: { '--bg-color': '#f4f4f4', '--calendar-bg': 'white', '--day-bg': '#eee', '--day-hover': '#ddd', '--text-color': '#666' },
+                dark: { '--bg-color': '#333', '--calendar-bg': '#444', '--day-bg': '#555', '--day-hover': '#666', '--text-color': '#ddd' },
+                blue: { '--bg-color': '#d0e1ff', '--calendar-bg': '#a7c7ff', '--day-bg': '#7aaaff', '--day-hover': '#5c88ff', '--text-color': '#fff' },
+                green: { '--bg-color': '#d4edda', '--calendar-bg': '#a3e4a3', '--day-bg': '#81c784', '--day-hover': '#66bb6a', '--text-color': '#fff' },
+                pink: { '--bg-color': '#ffdae1', '--calendar-bg': '#ffb3c1', '--day-bg': '#ff809b', '--day-hover': '#ff4d6a', '--text-color': '#fff' },
+                purple: { '--bg-color': '#e6e0f2', '--calendar-bg': '#d1c4e9', '--day-bg': '#9575cd', '--day-hover': '#7e57c2', '--text-color': '#fff' },
+                orange: { '--bg-color': '#ffebcd', '--calendar-bg': '#ffd54f', '--day-bg': '#ff9800', '--day-hover': '#fb8c00', '--text-color': '#fff' },
+                red: { '--bg-color': '#ffe6e6', '--calendar-bg': '#f44336', '--day-bg': '#e57373', '--day-hover': '#ef5350', '--text-color': '#fff' },
+                yellow: { '--bg-color': '#fff9c4', '--calendar-bg': '#fff176', '--day-bg': '#ffeb3b', '--day-hover': '#fdd835', '--text-color': '#000' },
+                brown: { '--bg-color': '#d7ccc8', '--calendar-bg': '#bcaaa4', '--day-bg': '#8d6e63', '--day-hover': '#6d4c41', '--text-color': '#fff' },
+                teal: { '--bg-color': '#e0f2f1', '--calendar-bg': '#80deea', '--day-bg': '#4db6ac', '--day-hover': '#26a69a', '--text-color': '#fff' },
+                gray: { '--bg-color': '#eceff1', '--calendar-bg': '#b0bec5', '--day-bg': '#78909c', '--day-hover': '#607d8b', '--text-color': '#fff' },
+                lavender: { '--bg-color': '#f3e5f5', '--calendar-bg': '#e1bee7', '--day-bg': '#ce93d8', '--day-hover': '#ab47bc', '--text-color': '#fff' },
+                peach: { '--bg-color': '#ffccbc', '--calendar-bg': '#ffab91', '--day-bg': '#ff7043', '--day-hover': '#f4511e', '--text-color': '#fff' },
+                turquoise: { '--bg-color': '#b2dfdb', '--calendar-bg': '#80cbc4', '--day-bg': '#4db6ac', '--day-hover': '#26a69a', '--text-color': '#fff' },
+                mint: { '--bg-color': '#e8f5e9', '--calendar-bg': '#a5d6a7', '--day-bg': '#81c784', '--day-hover': '#66bb6a', '--text-color': '#000' },
+                beige: { '--bg-color': '#f5f5dc', '--calendar-bg': '#d4e157', '--day-bg': '#9e9e9e', '--day-hover': '#757575', '--text-color': '#000' },
+                violet: { '--bg-color': '#f3e5f5', '--calendar-bg': '#9c27b0', '--day-bg': '#ba68c8', '--day-hover': '#8e24aa', '--text-color': '#fff' },
+                coral: { '--bg-color': '#ffe0e0', '--calendar-bg': '#ff7043', '--day-bg': '#ff5722', '--day-hover': '#e64a19', '--text-color': '#fff' },
+                magenta: { '--bg-color': '#f8bbd0', '--calendar-bg': '#ec407a', '--day-bg': '#e91e63', '--day-hover': '#c2185b', '--text-color': '#fff' },
+                indigo: { '--bg-color': '#e8eaf6', '--calendar-bg': '#3f51b5', '--day-bg': '#5c6bc0', '--day-hover': '#3949ab', '--text-color': '#fff' },
+                champagne: { '--bg-color': '#f3e5ab', '--calendar-bg': '#ffeb3b', '--day-bg': '#fdd835', '--day-hover': '#fbc02d', '--text-color': '#000' },
+                aqua: { '--bg-color': '#e0f7fa', '--calendar-bg': '#80deea', '--day-bg': '#4dd0e1', '--day-hover': '#26c6da', '--text-color': '#000' },
+                seafoam: { '--bg-color': '#e8f5e9', '--calendar-bg': '#a5d6a7', '--day-bg': '#81c784', '--day-hover': '#66bb6a', '--text-color': '#000' },
+                sand: { '--bg-color': '#32CD32', '--calendar-bg': '#ffcc80', '--day-bg': '#ffb74d', '--day-hover': '#ff9800', '--text-color': '#000' },
+                emerald: { '--bg-color': '#e8f5e9', '--calendar-bg': '#43a047', '--day-bg': '#388e3c', '--day-hover': '#2c6e32', '--text-color': '#fff' }
+            };
+            Object.entries(themes[document.getElementById("theme").value]).forEach(([key, value]) => document.documentElement.style.setProperty(key, value));
+        }
+
+        renderCalendar();
+      // Function to encode and save all events in a single string
+function saveAllEvents() {
+    let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    let eventArray = [];
+    for (let day = 1; day <= daysInMonth; day++) {
+        let dateKey = `${currentYear}-${currentMonth + 1}-${day}`;
+        eventArray.push(localStorage.getItem(dateKey) || "");
+    }
+    localStorage.setItem("events", eventArray.join(","));
+}
+
+// Function to load all events from the encoded string
+function loadAllEvents() {
+    let savedEvents = localStorage.getItem("events");
+    if (!savedEvents) return;
+    let eventArray = savedEvents.split(",");
+    let daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+    for (let day = 1; day <= daysInMonth; day++) {
+        let dateKey = `${currentYear}-${currentMonth + 1}-${day}`;
+        if (eventArray[day - 1]) {
+            localStorage.setItem(dateKey, eventArray[day - 1]);
+        }
+    }
+}
+
+// Override the saveNote function to save all events at once
+function saveNote() {
+    const noteText = document.getElementById("note-text").value;
+    localStorage.setItem(selectedDate, noteText);
+    saveAllEvents();
+    renderCalendar();
+    closeModal();
+}
+
+// Load events when rendering the calendar
+loadAllEvents();
+renderCalendar();
+
+    </script>
+</body>
+</html>
