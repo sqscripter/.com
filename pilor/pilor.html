@@ -66,13 +66,7 @@
 
      
 
-      iframe {
-        width: 50%;
-        height: 100%;
-        border: none;
-        background: #fff;
-      }
-
+    
       #editor {
   width: 50%;
   height: 100%; /* Set a fixed height */
@@ -84,11 +78,7 @@
   /* Prevent any unexpected resizing */
 }
 
-.CodeMirror {
-  height: 100% !important; /* Ensures it stays within #editor */
-  
-  white-space: pre-wrap; /* Wrap text properly */
-}
+
 
       .CodeMirror-focused {
         outline: none !important;
@@ -118,6 +108,24 @@
 #toolbar img {
     height: 40px;
     width: auto;
+}
+#editor-preview-container {
+  display: flex;
+  flex: 1;
+  margin-bottom: 20px;
+  min-height: 0;
+}
+
+#editor, iframe {
+  width: 50%;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.CodeMirror {
+  height: 100% !important;
+  white-space: pre-wrap;
+  overflow-y: auto;
 }
 
     </style>
