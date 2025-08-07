@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minimalist Cubing Timer</title>
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            background-color: #242424;
+            color: #f0f0f0;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        body.light-mode {
+            background-color: #f9f9f9;
+            color: #383838;
+        }
+
+        #solves-container {
+            width: 280px;
+            padding: 25px;
+            border-right: 1px solid #4d4d4d;
+            overflow-y: auto;
+            box-sizing: border-box;
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        body.light-mode #solves-container {
+            border-color: #e0e0e0;
+        }
+
+        #solves-list {
+            list-style: none;
+            padding: 0;
+            margin-bottom: 15px;
+            flex-grow: 1;
+            overflow-y: auto;
+        }
+
+        .solve-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed #4d4d4d;
+            font-size: 0.95em;
+        }
+
+        body.light-mode .solve-item {
+            border-bottom-color: #e0e0e0;
+        }
+
+        .solve-time {
+            flex-grow: 1;
+        }
+
+        .delete-solve {
+            cursor: pointer;
+            color: #999;
+            font-size: 0.85em;
+            margin-left: 12px;
+            transition: color 0.2s ease-in-out;
+        }
+
+        .delete-solve:hover {
+            color: #ccc;
+        }
+
+        body.light-mode .delete-solve {
+            color: #b3b3b3;
+        }
+
+        body.light-mode .delete-solve:hover {
+            color: #555;
+        }
+
+        .solve-checkbox {
+            margin-right: 12px;
+            transform: scale(1.3);
+        }
+
+        .solve-checkbox.mass-delete-mode {
+            display: none;
+        }
+
+        .solve-checkbox {
+            display: none;
+        }
+
+        #timer-container {
+            flex-grow: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        #time-display {
+            font-size: 5.5em;
+            margin-bottom: 25px;
+            letter-spacing: -0.03em;
+        }
+
+        #bottom-buttons-container {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            padding: 15px 0;
+            text-align: center;
+            background-color: #242424;
+            border-top: 1px solid #4d4d4d;
+        }
+
+        body.light-mode #bottom-buttons-container {
+            background-color: #f9f9f9;
+            border-top-color: #e0e0e0;
+        }
+
+        #export-solves, #import-solves-button, #delete-selected-button, #cancel-delete-button, #settings-button {
+            padding: 12px 20px;
+            cursor: pointer;
+            background-color: #444;
+            color: #f0f0f0;
+            border: none;
+            border-radius: 7px;
+            margin: 6px;
+            font-size: 0.9em;
+            transition: background-color 0.2s ease-in-out;
+        }
+
+        #export-solves:hover, #import-solves-button:hover, #delete-selected-button:hover, #cancel-delete-button:hover, #settings-button:hover {
+            background-color: #555;
+        }
+
+        body.light-mode #export-solves, body.light-mode #import-solves-button, body.light-mode #delete-selected-button, body.light-mode #cancel-delete-button, body.light-mode #settings-button {
+            background-color: #e0e0e0;
+            color: #383838;
+        }
+
+        body.light-mode #export-solves:hover, body.light-mode #import-solves-button:hover, body.light-mode #delete-selected-button:hover, body.light-mode #cancel-delete-button:hover, body.light-mode #settings-button:hover {
+            background-color: #f0f0f0;
+        }
+
+       
+        #import-solves-input {
+            display: none;
+        }
+
+        .dark-mode-slider-container {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            display: flex;
+            align-items: center;
+        }
+
+        .dark-mode-slider-label {
+            margin-right: 12px;
+            color: #f0f0f0;
+            user-select: none;
+            font-size: 0.9em;
+        }
+
+        body.light-mode .dark-mode-slider-label {
+            color: #383838;
+        }
+
+        .dark-mode-checkbox {
+            appearance: none;
+            width: 45px;
+            height: 24px;
+            background-color: #777;
+            border-radius: 24px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        .dark-mode-checkbox:checked {
+            background-color: #80cbc4;
+        }
+
+        .dark-mode-checkbox::before {
+            content: "";
+            position: absolute;
+            width: 22px;
+            height: 22px;
+            border-radius: 50%;
+            background-color: #f0f0f0;
+            top: 1px;
+            left: 1px;
+            transition: transform 0.3s;
+        }
+
+        .dark-mode-checkbox:checked::before {
+            transform: translateX(21px);
+        }
+
+        /* Settings Menu Styles */
+        #settings-menu {
+            position: fixed;
+            bottom: 60px; /* Position above the bottom buttons */
+            left: 50%;
+            transform: translateX(-50%); /* Center horizontally */
+            background-color: #333; /* Darker background for menu */
+            border: 1px solid #555; /* Slightly lighter border for menu */
+            border-radius: 8px;
+            padding: 20px;
+            z-index: 10; /* Ensure it's on top of other elements */
+            display: none; /* Initially hidden */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.5); /* Add a shadow for depth */
+        }
+
+        body.light-mode #settings-menu {
+            background-color: #f0f0f0; /* Light mode menu background */
+            border-color: #ccc; /* Light mode menu border */
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2); /* Shadow for light mode */
+        }
+
+        #settings-menu h3 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        #settings-menu label {
+            display: block; /* Each label on a new line */
+            margin-bottom: 8px;
+        }
+
+        #settings-menu input[type="checkbox"] {
+            margin-right: 8px;
+            transform: scale(1.2); /* Slightly larger checkboxes in settings */
+        }
+
+
+    </style>
+</head>
+<body id="body" class="dark-mode">
+    <div id="solves-container">
+        <h2>Solves</h2>
+        <ul id="solves-list">
+        </ul>
+    </div>
+
+    <div id="timer-container">
+        <div id="time-display">0.00</div>
+        <p style="font-size: 0.9em; color: #ccc;">Press spacebar to start/stop</p>
+    </div>
+
+    <div id="bottom-buttons-container">
+        <button id="export-solves">Export Solves</button>
+        <button id="import-solves-button">Import Solves</button>
+       <div id="g_id_onload"
+          data-client_id="794203957748-r7nhb1gb9g19tpa93mgmp25jvpi3rmb8.apps.googleusercontent.com"
+          data-context="signin"
+          data-ux_mode="popup"
+          data-login_uri="https://cubeclock.glitch.me"
+          data-auto_prompt="false">
+     </div>
+     <div class="g_id_signin" data-type="standard" data-size="large" data-theme="outline" data-text="signin_with" data-shape="rectangular" data-logo_alignment="left"></div>
+        
+    </div>
+
+    <div id="settings-menu"> <h3>Settings</h3>
+        <label>
+            <input type="checkbox" id="setting-option-1"> Setting Option 1
+        </label>
+        <label>
+            <input type="checkbox" id="setting-option-2"> Setting Option 2
+        </label>
+        </div>
+
+    <div class="dark-mode-slider-container">
+        <span class="dark-mode-slider-label">Light Mode:</span>
+        <input type="checkbox" id="dark-mode-checkbox" class="dark-mode-checkbox">
+    </div>
+    <input type="file" id="import-solves-input" accept=".json">
+
+    <script>
+        const body = document.getElementById('body');
+        const timeDisplay = document.getElementById('time-display');
+        const solvesList = document.getElementById('solves-list');
+        const exportSolvesButton = document.getElementById('export-solves');
+        const importSolvesButton = document.getElementById('import-solves-button');
+        const importSolvesInput = document.getElementById('import-solves-input');
+        const darkModeCheckbox = document.getElementById('dark-mode-checkbox');
+        const settingsButton = document.getElementById('settings-button'); // Settings Button Variable
+        const settingsMenu = document.getElementById('settings-menu'); // Settings Menu Variable
+
+
+        let timerInterval;
+        let startTime;
+        let running = false;
+        let solves = JSON.parse(localStorage.getItem('cubingSolves')) || [];
+        let darkModeEnabled = localStorage.getItem('darkModeEnabled') === 'true';
+        let selectedSolvesIndices = [];
+
+        // Set initial dark mode state based on localStorage
+        if (darkModeEnabled) {
+            body.classList.remove('light-mode');
+            darkModeCheckbox.checked = false;
+        } else {
+            body.classList.add('light-mode');
+            darkModeCheckbox.checked = true;
+        }
+
+        function updateDisplay() {
+            const currentTime = Date.now();
+            const elapsedTime = (currentTime - startTime) / 1000;
+            timeDisplay.textContent = elapsedTime.toFixed(2);
+        }
+
+        function startTimer() {
+            startTime = Date.now();
+            timerInterval = setInterval(updateDisplay, 10);
+            running = true;
+        }
+
+        function stopTimer() {
+            clearInterval(timerInterval);
+            running = false;
+            const solveTime = parseFloat(timeDisplay.textContent);
+            addSolve(solveTime);
+        }
+
+        function addSolve(time) {
+            solves.unshift(time);
+            localStorage.setItem('cubingSolves', JSON.stringify(solves));
+            renderSolves();
+        }
+
+    
+
+        function renderSolves() {
+            solvesList.innerHTML = '';
+            solves.forEach((time, index) => {
+                const listItem = document.createElement('li');
+                listItem.classList.add('solve-item');
+                listItem.innerHTML = `
+                    <input type="checkbox" class="solve-checkbox" data-index="${index}">
+                    <span class="solve-time">${time.toFixed(2)}</span>
+                    <span class="delete-solve" data-index="${index}"></span>
+                `;
+                const deleteButton = listItem.querySelector('.delete-solve');
+                const checkbox = listItem.querySelector('.solve-checkbox');
+
+                checkbox.classList.remove('mass-delete-mode');
+                deleteButton.classList.remove('mass-delete-mode');
+
+
+                solvesList.prepend(listItem);
+            });
+        }
+
+        function exportSolves() {
+            const now = new Date();
+            const timestamp = now.toISOString().replace(/[:\.]/g, '-');
+            const filename = `cubing_solves_${timestamp}.json`;
+            const jsonSolves = JSON.stringify(solves);
+            const blob = new Blob([jsonSolves], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function importSolves(file) {
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                try {
+                    const importedSolves = JSON.parse(event.target.result);
+                    if (Array.isArray(importedSolves)) {
+                        solves = importedSolves;
+                        localStorage.setItem('cubingSolves', JSON.stringify(solves));
+                        renderSolves();
+                        alert('Solves imported and replaced current solves.');
+                    } else {
+                        alert('Invalid file format. Please upload a valid JSON file.');
+                    }
+                } catch (e) {
+                    alert('Error parsing JSON file.');
+                }
+            };
+            reader.onerror = function(error) {
+                console.error("FileReader error:", error);
+                alert('Error reading file.');
+            };
+            reader.readAsText(file);
+        }
+
+        function toggleDarkMode() {
+            darkModeEnabled = !darkModeEnabled;
+            localStorage.setItem('darkModeEnabled', darkModeEnabled);
+            body.classList.toggle('light-mode');
+        }
+
+
+        function deleteSelectedSolves() {
+            if (selectedSolvesIndices.length > 0) {
+                selectedSolvesIndices.sort((a, b) => b - a);
+                selectedSolvesIndices.forEach(index => {
+                    solves.splice(index, 1);
+                });
+                localStorage.setItem('cubingSolves', JSON.stringify(solves));
+                renderSolves();
+                selectedSolvesIndices = [];
+            } else {
+                alert("No solves selected for deletion.");
+            }
+        }
+
+        function toggleSettingsMenu() {
+            settingsMenu.style.display = settingsMenu.style.display === 'none' ? 'block' : 'none';
+        }
+
+        document.addEventListener('keydown', (event) => {
+            if (event.code === 'Space') {
+                if (!running) {
+                    startTimer();
+                } else {
+                    stopTimer();
+                }
+            }
+        });
+
+        exportSolvesButton.addEventListener('click', exportSolves);
+        importSolvesButton.addEventListener('click', () => {
+            importSolvesInput.click();
+        });
+        importSolvesInput.addEventListener('change', (event) => {
+            const file = event.target.files[0];
+            if (file) {
+                importSolves(file);
+            }
+        });
+        darkModeCheckbox.addEventListener('change', toggleDarkMode);
+        settingsButton.addEventListener('click', toggleSettingsMenu); // Event listener for settings button
+
+
+        deleteSelectedButton.addEventListener('click', deleteSelectedSolves);
+        cancelDeleteButton.addEventListener('click', () => {}); // no function
+
+
+        solvesList.addEventListener('click', (event) => {
+             if (event.target.classList.contains('delete-solve')) {
+                const index = parseInt(event.target.dataset.index);
+                deleteSolve(index);
+            }
+        });
+
+  
+
+    </script>
+
+</body>
+</html>
