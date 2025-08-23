@@ -1,1 +1,171 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Are You Awake?</title>
+  <style>
+    :root{
+      --bg: #0f1221;
+      --card: #151935;
+      --ink: #e9ecff;
+      --muted:#a7b0ff;
+      --accent:#8b9bff;
+      --good:#47d18c;
+      --bad:#ff6b6b;
+      --radius: 18px;
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{
+      margin:0; font:16px/1.4 system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      color:var(--ink);
+      background: radial-gradient(1200px 800px at 20% 10%, #1b2050 0, #0f1221 60%),
+                  radial-gradient(1000px 800px at 80% 90%, #1a2b5a 0, #0f1221 60%);
+      display:grid; place-items:center; padding:24px;
+    }
+    .card{
+      width:min(720px, 96vw);
+      background:var(--card);
+      border-radius:var(--radius);
+      padding:28px 26px;
+      box-shadow:0 20px 60px rgba(0,0,0,.45), inset 0 1px 0 rgba(255,255,255,.03);
+      border:1px solid rgba(255,255,255,.06);
+    }
+    h1{margin:0 0 6px; font-weight:800; letter-spacing:.2px}
+    p.lead{margin:0 0 18px; color:var(--muted)}
+    .challenge{
+      margin:18px 0 14px; padding:16px; border-radius:var(--radius);
+      background:rgba(255,255,255,.04);
+      border:1px dashed rgba(255,255,255,.18);
+      font-size:18px; letter-spacing:.2px;
+      user-select:all;
+    }
+    .row{display:flex; gap:10px; margin-top:10px}
+    input[type="text"]{
+      flex:1; padding:14px 14px; border-radius:12px; border:1px solid rgba(255,255,255,.15);
+      background:#0f1331; color:var(--ink); outline:none; font-size:16px;
+      transition:border-color .15s ease, box-shadow .15s ease;
+    }
+    input[type="text"]:focus{border-color:var(--accent); box-shadow:0 0 0 4px rgba(139,155,255,.15)}
+    button{
+      cursor:pointer; border:0; border-radius:12px; padding:12px 16px; font-weight:700;
+      color:#0d0f21; background:linear-gradient(180deg, #aab5ff, #8b9bff);
+      box-shadow:0 10px 24px rgba(139,155,255,.35);
+    }
+    button.secondary{background:#20264f; color:var(--ink); box-shadow:none; border:1px solid rgba(255,255,255,.12)}
+    .status{margin-top:14px; min-height:24px; font-weight:700}
+    .ok{color:var(--good)}
+    .no{color:var(--bad)}
+    .hint{margin-top:6px; font-size:12px; color:var(--muted)}
+    .tiny{opacity:.75; font-size:12px; margin-top:20px}
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>Are you awake? 👀</h1>
+    <p class="lead">Prove alertness by typing the mysterious sentence exactly as it is displayed.</p>
 
+    <div id="challengeText" class="challenge" aria-live="polite"></div>
+
+    <div class="row">
+      <input id="answer" type="text" placeholder="Type the sentence here, precisely" autocomplete="off" spellcheck="false" />
+      <button id="checkBtn" title="Check your answer">Check</button>
+    </div>
+
+    <div class="row" style="margin-top:8px">
+      <button class="secondary" id="newBtn" title="Get a new sentence">New sentence</button>
+      <button class="secondary" id="copyBtn" title="Copy the challenge text">Copy text</button>
+    </div>
+
+    <div id="status" class="status" role="status" aria-live="polite"></div>
+    <div class="hint">It must match <em>exactly</em> — same letters, spaces, and punctuation.</div>
+    <div class="tiny">Tip: Click the sentence box to select all.</div>
+  </main>
+
+  <script>
+    // Randomized, intentionally-awkward sentence generator
+    function choice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+    function generateBadSentence(){
+      const starts = [
+        "For awaken checking",
+        "To confirm you are not sleep",
+        "Awake test announcement",
+        "Please be showing awareness",
+        "Sense of wakefulness control",
+        "System requires human wake proof"
+      ];
+      const middles = [
+        "please type this sentence",
+        "kindly retype the below phrase",
+        "enter exact the words presented",
+        "copy by keyboard the shown text",
+        "input the line with no remix"
+      ];
+      const tails = [
+        "exactly as it living here.",
+        "same-same, no extra spice.",
+        "with precision, not freestyle.",
+        "no jazz, no improvisate, okay?",
+        "without mistake of finger gremlin.",
+        "for confirm of full awaken mode."
+      ];
+      const emoji = ["✅","🧠","🕺","🫡","🔎","👁️"];
+      return `${choice(starts)}, ${choice(middles)} ${choice(tails)} ${choice(emoji)}`;
+    }
+
+    const challengeEl = document.getElementById('challengeText');
+    const answerEl = document.getElementById('answer');
+    const statusEl = document.getElementById('status');
+    const checkBtn = document.getElementById('checkBtn');
+    const newBtn = document.getElementById('newBtn');
+    const copyBtn = document.getElementById('copyBtn');
+
+    let current = '';
+
+    function setChallenge(){
+      current = generateBadSentence();
+      challengeEl.textContent = current;
+      answerEl.value = '';
+      statusEl.textContent = '';
+      answerEl.focus();
+    }
+
+    function normalize(s){
+      // Normalize to NFC to avoid weird Unicode mismatches
+      return (s ?? '').normalize('NFC');
+    }
+
+    function check(){
+      const ok = normalize(answerEl.value) === normalize(current);
+      statusEl.textContent = ok ? 'Awake confirmed. Welcome to daylight mode. ✨' : 'No match — eyeballs maybe sleeping. Try again.';
+      statusEl.className = 'status ' + (ok ? 'ok' : 'no');
+      if(ok){
+        // celebrate lightly by pulsing the card
+        document.querySelector('.card').animate([
+          { transform:'scale(1)', filter:'brightness(1)' },
+          { transform:'scale(1.01)', filter:'brightness(1.15)' },
+          { transform:'scale(1)', filter:'brightness(1)' }
+        ], { duration: 450, easing: 'ease-out' });
+      }
+    }
+
+    checkBtn.addEventListener('click', check);
+    newBtn.addEventListener('click', setChallenge);
+    copyBtn.addEventListener('click', () => {
+      navigator.clipboard.writeText(current).then(()=>{
+        statusEl.textContent = 'Challenge copied to clipboard.';
+        statusEl.className = 'status ok';
+      });
+    });
+
+    answerEl.addEventListener('keydown', (e)=>{
+      if(e.key === 'Enter') check();
+    });
+
+    // Kick off
+    setChallenge();
+  </script>
+</body>
+</html>
