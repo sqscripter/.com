@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Worst Translator</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg-1: #f6f8fb;
+    --card: #ffffff;
+    --muted: #6b7280;
+    --accent: linear-gradient(90deg,#6b8cff,#8f6bff);
+    --primary: #3b82f6;
+    --glass: rgba(255,255,255,0.85);
+  }
+  html,body{height:100%}
+  body{
+    font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    margin:0;
+    background: radial-gradient(1000px 600px at 10% 10%, #f3f7ff 0%, #ffffff 30%, #eef2ff 100%);
+    color:#0f172a;
+    padding:28px;
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+  }
+
+  .container{
+    width:960px;
+    max-width:96%;
+    background:var(--card);
+    border-radius:14px;
+    box-shadow:0 10px 30px rgba(15,23,42,0.12);
+    padding:22px;
+  }
+
+  header{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    margin-bottom:16px;
+  }
+  h1{
+    margin:0;
+    font-size:20px;
+    font-weight:700;
+    color:#0b1220;
+  }
+  .sub {
+    color:var(--muted);
+    font-size:13px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns: 1fr 360px;
+    gap:18px;
+    align-items:start;
+  }
+
+  label{
+    display:block;
+    font-size:13px;
+    color:#0b1220;
+    margin-bottom:8px;
+    font-weight:600;
+  }
+  textarea,input[type="number"]{
+    width:100%;
+    border-radius:10px;
+    border:1px solid #e6e9ef;
+    padding:12px 12px;
+    font-size:14px;
+    box-sizing:border-box;
+    background: #fbfdff;
+    color:#071029;
+  }
+  textarea { min-height:120px; resize:vertical; }
+  .small { min-height:56px; }
+
+  .controls {
+    margin-top:12px;
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+
+  .btn {
+    background: linear-gradient(90deg,#3b82f6,#8b5cf6);
+    color:white;
+    border:none;
+    padding:10px 14px;
+    border-radius:10px;
+    font-weight:600;
+    cursor:pointer;
+    box-shadow:0 6px 18px rgba(59,130,246,0.18);
+  }
+  .btn.secondary {
+    background:transparent;
+    border:1px solid #e6e9ef;
+    color:#0b1220;
+    box-shadow:none;
+  }
+
+  .progressWrap { margin-top:14px; }
+  .progressOuter {
+    width:100%;
+    height:18px;
+    background:#f1f5f9;
+    border-radius:10px;
+    overflow:hidden;
+    border:1px solid #eef2ff;
+  }
+  .progressInner {
+    height:100%;
+    width:0%;
+    background: linear-gradient(90deg,#3b82f6,#8b5cf6);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:white;
+    font-weight:700;
+    font-size:12px;
+  }
+
+  .result {
+    margin-top:6px;
+    background:#fbfdff;
+    border:1px solid #eef2ff;
+    border-radius:10px;
+    padding:12px;
+    min-height:140px;
+    white-space:pre-wrap;
+    font-size:14px;
+    color:#0b1220;
+  }
+
+  .stats {
+    margin-top:12px;
+    background:#fbfdff;
+    border:1px solid #eef2ff;
+    border-radius:10px;
+    padding:12px;
+    color:#0b1220;
+    font-size:14px;
+  }
+
+  .fieldRow {
+    display:flex;
+    gap:10px;
+    align-items:center;
+  }
+  .smallInput { width:88px; }
+
+  footer {
+    margin-top:16px;
+    font-size:13px;
+    color:var(--muted);
+    text-align:right;
+  }
+
+  @media (max-width:900px){
+    .grid{ grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+  <div class="container" role="main">
+    <header>
+      <div>
+        <h1>Worst Translator</h1>
+      </div>
+    </header>
+
+    <div class="grid">
+      <div class="left">
+        <label for="inputText">Input Text</label>
+        <textarea id="inputText" placeholder="Paste or type your paragraph here..."></textarea>
+
+        <label for="chaosBox">Random</label>
+        <textarea id="chaosBox" class="small" placeholder="Type a phrase"></textarea>
+
+        <div class="fieldRow" style="margin-top:6px;">
+          <div>
+            <label for="chaosAmount">How many copies of that to insert?</label>
+            <input id="chaosAmount" type="number" min="0" value="1" class="smallInput" />
+          </div>
+          <div style="flex:1">
+            <label>&nbsp;</label>
+            <div class="controls">
+              <button class="btn" id="translateBtn">Translate!</button>
+              <button class="btn secondary" id="recycleBtn">♻ Recycle It</button>
+              <div style="flex:1"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="progressWrap">
+          <div class="progressOuter" aria-hidden="true">
+            <div class="progressInner" id="progressBar">0%</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px;">
+          <label>Result</label>
+          <div id="result" class="result" aria-live="polite"></div>
+        </div>
+      </div>
+
+      <aside class="right">
+        <div class="panel">
+          <label>Settings</label>
+          <div style="padding:10px; background:#fbfdff; border:1px solid #eef2ff; border-radius:10px;">
+            <div style="margin-bottom:8px;">
+              <label style="font-size:13px; font-weight:600">Iterations</label>
+              <input id="iterations" type="number" min="1" value="10" class="smallInput" />
+            </div>
+            <div>
+              <label style="font-size:13px; font-weight:600">Languages per iteration</label>
+              <input id="langsPerIter" type="number" min="1" value="5" class="smallInput" />
+            </div>
+          </div>
+
+          <div style="margin-top:12px;">
+            <label>Final Stats</label>
+            <div id="stats" class="stats">
+              Original word count: — <br>
+              Final word count: — <br>
+              Difference: — <br>
+              Chaos phrase location: — 
+            </div>
+          </div>
+
+        </div>
+      </aside>
+    </div>
+
+    <footer>
+      Tip: use the recycle button to run multiple cycles quickly.
+    </footer>
+  </div>
+
+<script>
+const languages = [
+  'af','sq','am','ar','hy','az','eu','be','bn','bs','bg','ca','ceb','zh-CN','zh-TW','co','hr','cs',
+  'da','nl','en','eo','et','fi','fr','fy','gl','ka','de','el','gu','ht','ha','haw','he','hi','hmn',
+  'hu','is','ig','id','ga','it','ja','jw','kn','kk','km','rw','ko','ku','ky','lo','la','lv','lt','lb',
+  'mk','mg','ms','ml','mt','mi','mr','mn','my','ne','no','ny','or','ps','fa','pl','pt','pa','ro','ru',
+  'sm','gd','sr','st','sn','sd','si','sk','sl','so','es','su','sw','sv','tl','tg','ta','tt','te','th',
+  'tr','tk','uk','ur','uz','vi','cy','xh','yi','yo','zu'
+];
+
+function updateProgress(percent){
+  const bar = document.getElementById('progressBar');
+  bar.style.width = percent + '%';
+  bar.textContent = percent + '%';
+}
+
+function splitSentences(text){
+  const parts = text.split(/(?<=[.?!])\s+/);
+  return parts.filter(s => s.trim().length > 0);
+}
+
+function sanitizeWords(s){
+  return s.trim().split(/\s+/).filter(Boolean);
+}
+
+async function translate(text, from, to){
+  if(!text || text.trim()==='') return '';
+  const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=${from}&tl=${to}&dt=t&q=${encodeURIComponent(text)}`;
+  const res = await fetch(url);
+  if(!res.ok) throw new Error('Translate request failed: ' + res.status);
+  const data = await res.json();
+  return data[0].map(chunk => chunk[0]).join('');
+}
+
+function chooseRandomLang(){
+  return languages[Math.floor(Math.random()*languages.length)];
+}
+
+function buildPlan(iterations, langsPerIter){
+  const plan = [];
+  for(let i=0;i<iterations;i++){
+    const seq = [];
+    for(let j=0;j<langsPerIter;j++){
+      seq.push(chooseRandomLang());
+    }
+    seq.push('en'); // always return to English
+    plan.push(seq);
+  }
+  return plan;
+}
+
+// === insertChaosOnce: cleaned up, no notice ===
+function insertChaosOnce(text, chaosPhrase, chaosAmount){
+  if(!chaosPhrase || chaosAmount<=0) return text;
+  const words = sanitizeWords(text);
+  if(words.length===0){
+    const inserts = Array(chaosAmount).fill(chaosPhrase).join(' ');
+    return inserts;
+  }
+  for(let i=0;i<chaosAmount;i++){
+    const insertPos = Math.floor(Math.random()*(words.length+1));
+    words.splice(insertPos, 0, chaosPhrase);
+  }
+  return words.join(' ');
+}
+
+function locateChaos(finalText, mutatedChaos){
+  if(!mutatedChaos || mutatedChaos.trim()==='') return { found:false, reason:'No chaos phrase provided' };
+  const sentences = splitSentences(finalText);
+  const lowerMut = mutatedChaos.trim().toLowerCase();
+  for(let i=0;i<sentences.length;i++){
+    const s = sentences[i];
+    if(s.toLowerCase().includes(lowerMut)){
+      const before = s.toLowerCase().split(lowerMut)[0];
+      const wordsBefore = sanitizeWords(before).length;
+      const wordIndex = wordsBefore + 1;
+      return { found:true, sentence: i+1, word: wordIndex, method:'exact' };
+    }
+  }
+  const mutatedWords = sanitizeWords(mutatedChaos.toLowerCase());
+  let best = {score:0, sentenceIndex:-1, firstWordPos: -1};
+  for(let i=0;i<sentences.length;i++){
+    const s = sentences[i].toLowerCase();
+    const sWords = sanitizeWords(s);
+    let matches=0, firstPos=-1;
+    for(let m=0;m<mutatedWords.length;m++){
+      const w = mutatedWords[m];
+      const pos = sWords.findIndex(sw => sw.replace(/[^\w\u00C0-\u017F-]/g,'') === w.replace(/[^\w\u00C0-\u017F-]/g,''));
+      if(pos!==-1){
+        matches++;
+        if(firstPos===-1) firstPos = pos+1;
+      }
+    }
+    if(matches>best.score){
+      best.score = matches;
+      best.sentenceIndex = i;
+      best.firstWordPos = firstPos;
+    }
+  }
+  if(best.score>0){
+    return { found:true, sentence: best.sentenceIndex+1, word: best.firstWordPos || 1, method:'approx' };
+  }
+  return { found:false, reason:'Mutated phrase not located' };
+}
+
+document.getElementById('translateBtn').addEventListener('click', async ()=>{
+  const inputTextEl = document.getElementById('inputText');
+  const chaosBoxEl = document.getElementById('chaosBox');
+  const chaosAmountEl = document.getElementById('chaosAmount');
+  const iterationsEl = document.getElementById('iterations');
+  const langsPerIterEl = document.getElementById('langsPerIter');
+  const resultEl = document.getElementById('result');
+  const statsEl = document.getElementById('stats');
+
+  let text = inputTextEl.value || '';
+  const chaosPhrase = (chaosBoxEl.value || '').trim();
+  const chaosAmount = Math.max(0, parseInt(chaosAmountEl.value||'0') || 0);
+  const iterations = Math.max(1, parseInt(iterationsEl.value||'10') || 10);
+  const langsPerIter = Math.max(1, parseInt(langsPerIterEl.value||'5') || 5);
+
+  resultEl.textContent = 'Starting...';
+  statsEl.innerHTML = 'Working...';
+  updateProgress(2);
+
+  const originalCount = sanitizeWords(text).length;
+  const textWithChaos = insertChaosOnce(text, chaosPhrase, chaosAmount);
+  const plan = buildPlan(iterations, langsPerIter);
+
+  let workingText = textWithChaos;
+  let mutatedChaos = chaosPhrase;
+  const totalSteps = iterations * langsPerIter;
+  let stepCounter = 0;
+
+  try{
+    for(let i=0;i<plan.length;i++){
+      const seq = plan[i];
+      for(let s=0;s<seq.length-1;s++){
+        const from = seq[s];
+        const to = seq[s+1];
+        workingText = await translate(workingText, from, to);
+        if(mutatedChaos && mutatedChaos.trim()!==''){
+          mutatedChaos = await translate(mutatedChaos, from, to);
+        }
+        stepCounter++;
+        const percent = Math.round((stepCounter / totalSteps)*100);
+        updateProgress(percent);
+      }
+    }
+  }catch(e){
+    resultEl.textContent = 'Translation failed: ' + e.message;
+    statsEl.innerHTML = 'Error during translation. Try again or reduce iterations/languages.';
+    updateProgress(0);
+    return;
+  }
+
+  updateProgress(100);
+
+  const finalCount = sanitizeWords(workingText).length;
+  const diff = finalCount - originalCount;
+  const diffText = diff === 0 ? 'No change in word count.' : (diff > 0 ? `+${diff} words gained.` : `${diff} words lost.`);
+
+  resultEl.textContent = workingText;
+  statsEl.innerHTML = `Original word count: ${originalCount} <br>
+                       Final word count: ${finalCount} <br>
+                       ${diffText} <br>`;
+
+  resultEl.scrollIntoView({behavior:'smooth', block:'nearest'});
+});
+
+document.getElementById('recycleBtn').addEventListener('click', ()=>{
+  const result = document.getElementById('result').textContent || '';
+  document.getElementById('inputText').value = result;
+});
+
+updateProgress(0);
+</script>
+</body>
+</html>
