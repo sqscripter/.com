@@ -2,279 +2,640 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="description" content="The sqscripter home page" />
-  <meta name="keywords" content="HTML, CSS, JavaScript, sqscripter" />
-  <meta name="author" content="Sqscripter" />
+  <meta name="description" content="sqscripter — projects, tools, experiments" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="images/sqscripterpfp.png" type="image/x-icon" />
   <title>sqscripter.com</title>
-
-  <link
-    rel="stylesheet"
-    href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css"
-  />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700;1,400&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet" />
 
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #0e0e0f;
+      --surface: #161618;
+      --surface2: #1e1e21;
+      --border: rgba(255,255,255,0.07);
+      --border2: rgba(255,255,255,0.13);
+      --text: #e8e8e4;
+      --muted: #888884;
+      --accent: #c8f04a;
+      --accent2: #4af0b8;
+      --gold: #ffd700;
+      --silver: #c0c0c0;
+      --bronze: #cd7f32;
+      --mono: 'Space Mono', monospace;
+      --serif: 'Instrument Serif', serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
     body {
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-        Helvetica, Arial, sans-serif;
-      background-color: #242424;
-      color: #d9d9d9;
-      text-align: center;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--mono);
+      min-height: 100vh;
+      overflow-x: hidden;
     }
 
-    h1 {
-      font-size: 64px;
-      margin: 40px 0 10px;
+    /* ── NOISE OVERLAY ── */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+      opacity: 0.025;
+      pointer-events: none;
+      z-index: 0;
     }
 
-    .info {
-      max-width: 700px;
-      margin: 0 auto 60px;
-      padding: 0 20px;
-      font-size: 18px;
-      color: #d9d9d9;
+    /* ── GRID LINES ── */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(var(--border) 1px, transparent 1px),
+        linear-gradient(90deg, var(--border) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
     }
 
-    .top-projects {
+    /* ── GLOW BLOB ── */
+    .glow-blob {
+      position: fixed;
+      top: -200px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(ellipse, rgba(200,240,74,0.06) 0%, transparent 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ── NAV ── */
+    nav {
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
       display: flex;
-      justify-content: center;
-      gap: 40px;
-      margin-bottom: 80px;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 40px;
+      background: rgba(14,14,15,0.8);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
     }
 
-    .top-project {
-      width: 27vw;
-      height: 15.45vw;
-      border-radius: 12px;
-      background: rgb(255, 255, 255);
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.08em;
+      text-decoration: none;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 32px;
+      list-style: none;
+    }
+
+    .nav-links a {
+      font-size: 11px;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--text); }
+
+    /* ── HERO ── */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 40px 80px;
+    }
+
+    .hero-tag {
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--accent);
+      border: 1px solid rgba(200,240,74,0.3);
+      padding: 5px 14px;
+      border-radius: 2px;
+      margin-bottom: 32px;
+      display: inline-block;
+    }
+
+    .hero-title {
+      font-family: var(--serif);
+      font-size: clamp(64px, 10vw, 130px);
+      line-height: 0.92;
+      letter-spacing: -0.02em;
+      margin-bottom: 12px;
+    }
+
+    .hero-title em {
+      font-style: italic;
+      color: var(--muted);
+    }
+
+    .hero-sub {
+      font-size: 13px;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      margin-top: 28px;
+      margin-bottom: 56px;
+    }
+
+    .hero-scroll {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .hero-scroll:hover { color: var(--text); }
+
+    .scroll-line {
+      width: 40px;
+      height: 1px;
+      background: currentColor;
+      display: inline-block;
+    }
+
+    /* ── SECTION ── */
+    section {
+      position: relative;
+      z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 0 40px 120px;
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 16px;
+      margin-bottom: 52px;
+    }
+
+    .section-num {
+      font-size: 11px;
+      color: var(--accent);
+      letter-spacing: 0.12em;
+    }
+
+    .section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border2);
+    }
+
+    /* ── PODIUM ── */
+    .podium {
+      display: grid;
+      grid-template-columns: 1fr 1.15fr 1fr;
+      gap: 16px;
+      align-items: end;
+      margin-bottom: 24px;
+    }
+
+    .podium-card {
+      position: relative;
+      border-radius: 4px;
+      overflow: hidden;
+      text-decoration: none;
+      display: block;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      transition: transform 0.3s cubic-bezier(.22,.68,0,1.2), border-color 0.3s;
+      group: true;
+    }
+
+    .podium-card:hover { transform: translateY(-6px); }
+
+    .podium-card.gold { border-color: rgba(255,215,0,0.25); }
+    .podium-card.gold:hover { border-color: rgba(255,215,0,0.6); box-shadow: 0 0 40px rgba(255,215,0,0.12); }
+
+    .podium-card.silver { border-color: rgba(192,192,192,0.2); }
+    .podium-card.silver:hover { border-color: rgba(192,192,192,0.5); box-shadow: 0 0 40px rgba(192,192,192,0.08); }
+
+    .podium-card.bronze { border-color: rgba(205,127,50,0.2); }
+    .podium-card.bronze:hover { border-color: rgba(205,127,50,0.5); box-shadow: 0 0 40px rgba(205,127,50,0.08); }
+
+    .podium-img-wrap {
+      aspect-ratio: 16/9;
+      overflow: hidden;
       display: flex;
       align-items: center;
       justify-content: center;
-      position: relative;
-      transition: 0.2s;
+      background: #000;
     }
 
-    .top-project.gold:hover {
-      box-shadow: 0 0 105px 5px rgba(255, 215, 0, 0.6);
-    }
-
-    .top-project img {
-      height: 100%;
-      object-fit: contain;
-      border-radius: 10px;
-      max-width: 100%;
-      overflow: hidden;
-    }
-
-    .top-project.gold {
-      box-shadow: 0 0 15px 5px rgba(255, 215, 0, 0.6);
-      order: 2;
-      transform: translateY(-20px);
-      background-color: black;
-    }
-
-    .top-project.silver {
-      box-shadow: 0 0 10px 4px rgba(192, 192, 192, 0.5);
-      order: 1;
-      transform: translateY(-10px);
-      background: rgb(53, 53, 170);
-    }
-
-    .top-project.silver:hover {
-      box-shadow: 0 0 105px 4px rgba(192, 192, 192, 0.5);
-    }
-
-    .top-project.bronze {
-      box-shadow: 0 0 10px 4px rgba(205, 127, 50, 0.5);
-      order: 3;
-      transform: translateY(-5px);
-    }
-
-    .top-project.bronze:hover {
-      box-shadow: 0 0 105px 4px rgba(205, 127, 50, 0.5);
-    }
-
-    .posts {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 30px;
-      padding: 0 20px 100px;
-      max-width: 1200px;
-    }
-    .posts img{
-      padding:0;
-      border-radius: 11px;
-    }
-
-    .page-link {
-      display: inline-block;
-      color: black;
-      width: 150px;
-      height: 150px;
-      background-color: #fff;
-      border-radius: 12px;
-      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-      transition: transform 0.2s, box-shadow 0.2s;
-      margin: 10px;
-    }
-
-    .page-link:hover {
-      transform: translateY(-5px);
-      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
-    }
-
-    .page-link-img {
+    .podium-img-wrap img {
       width: 100%;
       height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.5s;
+    }
+
+    .podium-card:hover .podium-img-wrap img { transform: scale(1.04); }
+
+    .podium-meta {
+      padding: 16px 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .podium-rank {
+      font-size: 10px;
+      letter-spacing: 0.12em;
+      font-weight: 700;
+    }
+
+    .rank-gold { color: var(--gold); }
+    .rank-silver { color: var(--silver); }
+    .rank-bronze { color: var(--bronze); }
+
+    .podium-arrow {
+      font-size: 14px;
+      color: var(--muted);
+      opacity: 0;
+      transform: translateX(-6px);
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    .podium-card:hover .podium-arrow { opacity: 1; transform: translateX(0); }
+
+    /* ── PROJECT GRID ── */
+    .projects-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .proj-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 24px;
+      text-decoration: none;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+      transition: background 0.2s, border-color 0.2s, transform 0.25s cubic-bezier(.22,.68,0,1.2);
+      aspect-ratio: 1;
+      justify-content: center;
+    }
+
+    .proj-card:hover {
+      background: var(--surface2);
+      border-color: var(--border2);
+      transform: translateY(-4px);
+    }
+
+    .proj-card img {
+      width: 72px;
+      height: 72px;
       object-fit: contain;
-      padding: 20px;
-      box-sizing: border-box;
     }
 
-    @keyframes move {
-      100% {
-        transform: translate3d(0, 0, 1px) rotate(360deg);
-      }
+    .proj-name {
+      font-size: 11px;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+      text-align: center;
+      text-transform: uppercase;
     }
 
-    .button-container {
+    /* ── SOCIAL ── */
+    .social-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .social-btn {
       display: flex;
       align-items: center;
-      justify-content: center;
-      height: 100%;
-      padding-bottom: 40px;
+      gap: 10px;
+      padding: 14px 24px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      text-decoration: none;
+      color: var(--muted);
+      font-size: 12px;
+      letter-spacing: 0.08em;
+      transition: background 0.2s, border-color 0.2s, color 0.2s;
     }
 
-    .glass-btn {
-      width: 100px;
-      height: 100px;
-      background-color: #fafafa;
+    .social-btn:hover {
+      background: var(--surface2);
+      border-color: var(--border2);
+      color: var(--text);
+    }
+
+    .social-btn img { width: 18px; height: 18px; object-fit: contain; filter: invert(1) brightness(0.6); }
+    .social-btn:hover img { filter: invert(1); }
+
+    /* ── FOOTER ── */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 32px 40px;
       display: flex;
       align-items: center;
-      justify-content: center;
-      border-radius: 7px;
-      margin-left: 1em;
-      margin-right: 1em;
-      cursor: pointer;
-      transition: all 0.3s;
+      justify-content: space-between;
+      max-width: 100%;
     }
 
-    .glass-btn:hover {
-      background-color: #e0e0e0;
-      transform: translateY(-5px);
-      transition: all 0.3s;
+    .footer-logo {
+      font-size: 12px;
+      color: var(--muted);
+      font-family: var(--mono);
     }
 
-    .blue-btn {
-      box-shadow: 0px 20px 20px -17px rgba(255, 255, 255, 0.53);
+    .footer-copy {
+      font-size: 11px;
+      color: rgba(255,255,255,0.2);
+      letter-spacing: 0.06em;
     }
 
-    .blue-btn:hover {
-      box-shadow: 0px 20px 35px -16px rgba(255, 255, 255, 0.65);
+    /* ── ANIMATIONS ── */
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(24px); }
+      to   { opacity: 1; transform: translateY(0); }
     }
 
-    .red-btn {
-      box-shadow: 0px 20px 20px -17px rgba(255, 16, 39, 0.5);
+    .fade-up { animation: fadeUp 0.7s cubic-bezier(.22,.68,0,1.2) both; }
+    .fade-up:nth-child(1) { animation-delay: 0.05s; }
+    .fade-up:nth-child(2) { animation-delay: 0.12s; }
+    .fade-up:nth-child(3) { animation-delay: 0.19s; }
+    .fade-up:nth-child(4) { animation-delay: 0.26s; }
+    .fade-up:nth-child(5) { animation-delay: 0.33s; }
+
+    .hero-tag { animation: fadeUp 0.6s 0.1s both; }
+    .hero-title { animation: fadeUp 0.7s 0.2s both; }
+    .hero-sub { animation: fadeUp 0.6s 0.35s both; }
+    .hero-scroll { animation: fadeUp 0.5s 0.48s both; }
+
+    /* ── MARQUEE ── */
+    .marquee-wrap {
+      overflow: hidden;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      padding: 14px 0;
+      margin-bottom: 100px;
+      position: relative;
+      z-index: 1;
     }
 
-    .red-btn:hover {
-      box-shadow: 0px 20px 35px -16px rgba(255, 16, 39, 0.57);
+    .marquee-track {
+      display: flex;
+      gap: 48px;
+      animation: marquee 20s linear infinite;
+      white-space: nowrap;
+      width: max-content;
     }
 
-    .amber-btn {
-      box-shadow: 0px 20px 20px -17px rgba(255, 159, 16, 0.53);
+    .marquee-item {
+      font-size: 11px;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--muted);
     }
 
-    .amber-btn:hover {
-      box-shadow: 0px 20px 35px -16px rgba(255, 159, 16, 0.6);
+    .marquee-dot {
+      color: var(--accent);
     }
 
-    .content {
-      font-size: 4em;
-      font-family: "Roboto", sans-serif;
-      background: linear-gradient(to right, #006fff, #00acff 70%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      text-shadow: 0px 10px 37px rgba(0, 111, 255, 0.8);
+    @keyframes marquee {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 700px) {
+      nav { padding: 16px 20px; }
+      .nav-links { display: none; }
+      .hero { padding: 100px 20px 60px; }
+      .hero-title { font-size: 56px; }
+      section { padding: 0 20px 80px; }
+      .podium { grid-template-columns: 1fr; }
+      footer { flex-direction: column; gap: 12px; text-align: center; }
     }
   </style>
 </head>
 <body>
-  <img src="images/sqscripter.png" class="toplogo" alt="Sqscripter Logo" />
 
-  <div class="info">My silly little project page</div>
+<div class="glow-blob"></div>
 
-  <!-- Top 3 Projects Podium -->
-  <div class="top-projects">
-    <a href="./pilor" class="top-project gold">
-      <img src="images/PilorThumb.png" alt="Pilor" />
-    </a>
-    <a href="./minimalcalendar" class="top-project silver">
-      <img src="images/MinimalCalendarThumb.png" alt="Minimalistic Calendar" />
-    </a>
-    <a href="./cookieclicker" class="top-project bronze">
-      <img src="images/CookieThumb.png" alt="Cookie Clicker" />
-    </a>
+<!-- NAV -->
+<nav>
+  <a href="#" class="nav-logo">sqscripter.com</a>
+  <ul class="nav-links">
+    <li><a href="#featured">Featured</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#connect">Connect</a></li>
+    <li><a href="https://github.com/sqscripter">GitHub ↗</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <span class="hero-tag">✦ portfolio</span>
+  <h1 class="hero-title">sq<em>script</em><br>er</h1>
+  <p class="hero-sub">// silly little projects, tools &amp; experiments</p>
+  <a href="#featured" class="hero-scroll">
+    <span class="scroll-line"></span>
+    scroll to explore
+    <span class="scroll-line"></span>
+  </a>
+</div>
+
+<!-- MARQUEE -->
+<div class="marquee-wrap">
+  <div class="marquee-track">
+    <span class="marquee-item">html <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">css <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">javascript <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">web tools <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">experiments <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">games <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">apps <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">open source <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">html <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">css <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">javascript <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">web tools <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">experiments <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">games <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">apps <span class="marquee-dot">✦</span></span>
+    <span class="marquee-item">open source <span class="marquee-dot">✦</span></span>
+  </div>
+</div>
+
+<!-- FEATURED / PODIUM -->
+<section id="featured">
+  <div class="section-header">
+    <span class="section-num">01</span>
+    <span class="section-title">Top Projects</span>
+    <div class="section-line"></div>
   </div>
 
-  <!-- Project Grid -->
-  <div class="posts">
-    <a href="/worsttranslator" class="page-link">
-      <img
-        src="https://github.com/sqscripter/.com/blob/main/images/WorstTranslatorThumb.png?raw=true"
-        alt="Bad Translator"
-        class="page-link-img"
-      />
+  <div class="podium">
+
+    <!-- SILVER (left) -->
+    <a href="./minimalcalendar" class="podium-card silver fade-up">
+      <div class="podium-img-wrap">
+        <img src="images/MinimalCalendarThumb.png" alt="Minimalistic Calendar" />
+      </div>
+      <div class="podium-meta">
+        <span class="podium-rank rank-silver">⬡ #2 — Minimal Calendar</span>
+        <span class="podium-arrow">→</span>
+      </div>
     </a>
-    <a href="/html-compiler/" class="page-link">
-      <img
-        src="/link-images/html-compiler.svg"
-        alt="HTML Compiler"
-        class="page-link-img"
-      />
+
+    <!-- GOLD (center, elevated) -->
+    <a href="./pilor" class="podium-card gold fade-up" style="transform: translateY(-20px);">
+      <div class="podium-img-wrap" style="aspect-ratio:16/10;">
+        <img src="images/PilorThumb.png" alt="Pilor" />
+      </div>
+      <div class="podium-meta">
+        <span class="podium-rank rank-gold">★ #1 — Pilor</span>
+        <span class="podium-arrow">→</span>
+      </div>
     </a>
-    <a href="/random-tool/" class="page-link">
-      <img
-        src="/link-images/random-tool.svg"
-        alt="Random Tool"
-        class="page-link-img"
-      />
+
+    <!-- BRONZE (right) -->
+    <a href="./cookieclicker" class="podium-card bronze fade-up">
+      <div class="podium-img-wrap">
+        <img src="images/CookieThumb.png" alt="Cookie Clicker" />
+      </div>
+      <div class="podium-meta">
+        <span class="podium-rank rank-bronze">◇ #3 — Cookie Clicker</span>
+        <span class="podium-arrow">→</span>
+      </div>
     </a>
-    <a href="/sandbox/" class="page-link">
-      <img src="/link-images/sandbox.svg" alt="Sandbox" class="page-link-img" />
-    </a>
-    <a href="/weird-experiment/" class="page-link">
-      <img
-        src="/link-images/weird-experiment.svg"
-        alt="Weird Experiment"
-        class="page-link-img"
-      />
-    </a>
+
+  </div>
+</section>
+
+<!-- ALL PROJECTS -->
+<section id="projects">
+  <div class="section-header">
+    <span class="section-num">02</span>
+    <span class="section-title">All Projects</span>
+    <div class="section-line"></div>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+  <div class="projects-grid">
+    <a href="/worsttranslator" class="proj-card fade-up">
+      <img src="https://github.com/sqscripter/.com/blob/main/images/WorstTranslatorThumb.png?raw=true" alt="Bad Translator" />
+      <span class="proj-name">Worst Translator</span>
+    </a>
+    <a href="/html-compiler/" class="proj-card fade-up">
+      <img src="/link-images/html-compiler.svg" alt="HTML Compiler" />
+      <span class="proj-name">HTML Compiler</span>
+    </a>
+    <a href="/random-tool/" class="proj-card fade-up">
+      <img src="/link-images/random-tool.svg" alt="Random Tool" />
+      <span class="proj-name">Random Tool</span>
+    </a>
+    <a href="/sandbox/" class="proj-card fade-up">
+      <img src="/link-images/sandbox.svg" alt="Sandbox" />
+      <span class="proj-name">Sandbox</span>
+    </a>
+    <a href="/weird-experiment/" class="proj-card fade-up">
+      <img src="/link-images/weird-experiment.svg" alt="Weird Experiment" />
+      <span class="proj-name">Weird Experiment</span>
+    </a>
+  </div>
+</section>
 
-  <footer>
-    <div class="button-container">
-      <a href="https://github.com/sqscripter" class="glass-btn blue-btn" aria-label="GitHub">
-        <img src="images/githublogo.png" alt="GitHub Logo" style="width: 5.5em" />
-      </a>
+<!-- CONNECT -->
+<section id="connect">
+  <div class="section-header">
+    <span class="section-num">03</span>
+    <span class="section-title">Connect</span>
+    <div class="section-line"></div>
+  </div>
 
-      <!-- Uncomment and fix when ready
-      <a href="https://youtube.com" class="glass-btn red-btn" aria-label="YouTube">
-        <img src="https://i.postimg.cc/LstJ4Hhf/youtube.png" alt="YouTube" style="width: 6em" />
-      </a>
+  <div class="social-row">
+    <a href="https://github.com/sqscripter" class="social-btn">
+      <img src="images/githublogo.png" alt="GitHub" />
+      github.com/sqscripter
+    </a>
+    <!-- Uncomment when ready:
+    <a href="https://youtube.com" class="social-btn">
+      <img src="https://i.postimg.cc/LstJ4Hhf/youtube.png" alt="YouTube" />
+      youtube
+    </a>
+    <a href="#" class="social-btn">
+      <img src="https://i.postimg.cc/tgQ1H1Rp/soundcloud.png" alt="SoundCloud" />
+      soundcloud
+    </a>
+    -->
+  </div>
+</section>
 
-      <a href="#" class="glass-btn amber-btn" aria-label="SoundCloud">
-        <img src="https://i.postimg.cc/tgQ1H1Rp/soundcloud.png" alt="SoundCloud" style="width: 6em" />
-      </a>
-      -->
-    </div>
-  </footer>
+<!-- FOOTER -->
+<footer>
+  <span class="footer-logo">sqscripter.com</span>
+  <span class="footer-copy">built with curiosity &amp; caffeine</span>
+</footer>
+
+<script>
+  // Intersection Observer for scroll-triggered fade-ups
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.style.opacity = '1';
+        e.target.style.transform = e.target.classList.contains('gold')
+          ? 'translateY(-20px)'
+          : 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.proj-card').forEach((el, i) => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = `opacity 0.5s ${i * 0.07}s, transform 0.5s ${i * 0.07}s`;
+    obs.observe(el);
+  });
+</script>
 </body>
 </html>
