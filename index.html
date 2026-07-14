@@ -514,7 +514,66 @@
     <span class="section-title">Top Projects</span>
     <div class="section-line"></div>
   </div>
+I'm building a Roblox Studio plugin called TideAnalytics (working name) — an analytics/telemetry tool for Roblox developers, starting with my own game "Last Tide." I don't know Lua, so the plugin itself needs to generate/wire code for the user rather than require them to write any.
 
+What we're building in this session
+
+A Roblox Studio plugin (Luau) + a lightweight backend service it talks to. Scope is v1 only — just the Studio-side integration and event pipeline. No web dashboard, no AI diagnosis layer yet — just get events flowing and viewable.
+
+Architecture
+
+
+Backend (build first) — a simple API service (Node/Express or similar, your choice) with:
+
+POST /events — accepts batched event payloads {apiKey, universeId, events: [{name, properties, timestamp, playerId}]}
+GET /events/recent?apiKey= — returns the last N events for a game (powers the live feed in the plugin)
+POST /register — generates an API key tied to a Roblox universeId
+Use a simple database (SQLite is fine for v1, or Postgres if you want it production-ready)
+Basic rate limiting and API key validation
+
+
+
+Roblox Studio Plugin (Luau):
+
+"Integrate" button: one click that:
+
+Prompts for/generates an API key (calls the backend /register endpoint)
+Auto-creates a ModuleScript named TideAnalytics in ServerScriptService containing a small tracking library (batches events client/server-side and POSTs to /events via HttpService)
+Auto-wires free/standard events with no user code needed: PlayerAdded, PlayerRemoving (session length), MarketplaceService PurchaseFinished (gamepass/dev product buys), Humanoid.Died if present
+
+
+
+Event Builder UI panel: a form inside the plugin (event name field + dynamic key/value property fields) that, on submit:
+
+Outputs one exact Luau line, e.g. TideAnalytics:Track("BlockPlaced", {distance = dist, blockSize = size})
+Outputs a plain-English placement instruction (e.g. "paste this line right after the block is parented to the island model") that a user could hand to Roblox's own Studio AI Assistant to place correctly
+
+
+
+Live Event Feed panel: polls GET /events/recent and displays incoming events in real time while playtesting, so the user can visually confirm wiring worked without reading code
+Plugin UI should be clean and native-feeling (use Roblox's plugin GUI APIs — DockWidgetPluginGui etc.)
+
+
+
+
+
+Constraints
+
+
+I don't write Lua — any place the plugin needs custom code inserted, it must generate the exact snippet and clear placement instructions, not assume I'll write it myself.
+Keep the backend simple and cheap to run (this is a bootstrapped side project, not funded).
+Favor clarity and working end-to-end over polish — I want to see events flow from a test game into the live feed before we add anything else.
+
+
+Deliverables for this session
+
+
+Backend service, runnable locally, with the three endpoints above
+Studio plugin (.rbxm or plugin script structure) with Integrate button, Event Builder, and Live Event Feed
+A short README on how I install the plugin in Studio and test it end-to-end with a dummy event
+
+
+Start by proposing the backend's data model and the plugin's file/module structure before writing code, so I can sanity check the plan.
   <div class="podium">
 
     <!-- SILVER (left) -->
