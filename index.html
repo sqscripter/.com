@@ -513,67 +513,355 @@
     <span class="section-num">01</span>
     <span class="section-title">Top Projects</span>
     <div class="section-line"></div>
-  </div>
-I'm building a Roblox Studio plugin called TideAnalytics (working name) — an analytics/telemetry tool for Roblox developers, starting with my own game "Last Tide." I don't know Lua, so the plugin itself needs to generate/wire code for the user rather than require them to write any.
-
-What we're building in this session
-
-A Roblox Studio plugin (Luau) + a lightweight backend service it talks to. Scope is v1 only — just the Studio-side integration and event pipeline. No web dashboard, no AI diagnosis layer yet — just get events flowing and viewable.
-
-Architecture
+  </div>Studs — Two-Phase Edit Prompt for Claude Code (Fable 5)
 
 
-Backend (build first) — a simple API service (Node/Express or similar, your choice) with:
-
-POST /events — accepts batched event payloads {apiKey, universeId, events: [{name, properties, timestamp, playerId}]}
-GET /events/recent?apiKey= — returns the last N events for a game (powers the live feed in the plugin)
-POST /register — generates an API key tied to a Roblox universeId
-Use a simple database (SQLite is fine for v1, or Postgres if you want it production-ready)
-Basic rate limiting and API key validation
+Working name used throughout: Studs. Swap every reference if you land on a different name before running these.
 
 
 
-Roblox Studio Plugin (Luau):
-
-"Integrate" button: one click that:
-
-Prompts for/generates an API key (calls the backend /register endpoint)
-Auto-creates a ModuleScript named TideAnalytics in ServerScriptService containing a small tracking library (batches events client/server-side and POSTs to /events via HttpService)
-Auto-wires free/standard events with no user code needed: PlayerAdded, PlayerRemoving (session length), MarketplaceService PurchaseFinished (gamepass/dev product buys), Humanoid.Died if present
+Run Phase 1 to completion first, review the UI, then run Phase 2. Phase 1 is design/structure only, built against mock/placeholder data. Phase 2 wires real data and logic behind it.
 
 
+PHASE 1 — Looks & Structure
 
-Event Builder UI panel: a form inside the plugin (event name field + dynamic key/value property fields) that, on submit:
-
-Outputs one exact Luau line, e.g. TideAnalytics:Track("BlockPlaced", {distance = dist, blockSize = size})
-Outputs a plain-English placement instruction (e.g. "paste this line right after the block is parented to the island model") that a user could hand to Roblox's own Studio AI Assistant to place correctly
+Restructure the product around 4 top-level sections: Play, Connect, Workshop, Locker.
 
 
-
-Live Event Feed panel: polls GET /events/recent and displays incoming events in real time while playtesting, so the user can visually confirm wiring worked without reading code
-Plugin UI should be clean and native-feeling (use Roblox's plugin GUI APIs — DockWidgetPluginGui etc.)
-
-
-
+Play — find people playing the same games, see who's online, per-game community spaces
+Connect — social feed, profiles, following, dev-to-player chat
+Workshop — analytics, dev tools, team projects (this is the current TideAnalytics core)
+Locker — profile customization, Robloxian, badges, accent colors
 
 
-Constraints
+Rename the product from TideAnalytics to Studs throughout the plugin, dashboard, and docs. This phase is UI/navigation/design only — no new backend logic, no real data wiring. Build every screen against mock/placeholder data.
+
+1. Global navigation
 
 
-I don't write Lua — any place the plugin needs custom code inserted, it must generate the exact snippet and clear placement instructions, not assume I'll write it myself.
-Keep the backend simple and cheap to run (this is a bootstrapped side project, not funded).
-Favor clarity and working end-to-end over polish — I want to see events flow from a test game into the live feed before we add anything else.
+4-section top-level nav: Play / Connect / Workshop / Locker
+Workshop keeps a clean, technical visual skin (dark, sharp-cornered data cards) — this is the "office"
+Play / Connect / Locker use a warm, color-blocked, studs-textured community look (see reference mockup) — this is the "hangout." The visual shift when moving between Workshop and the other three sections should be deliberate and noticeable.
 
 
-Deliverables for this session
+2. Design tokens
+
+Apply this system everywhere:
 
 
-Backend service, runnable locally, with the three endpoints above
-Studio plugin (.rbxm or plugin script structure) with Integrate button, Event Builder, and Live Event Feed
-A short README on how I install the plugin in Studio and test it end-to-end with a dummy event
+Corner radius (asymmetric by hierarchy, not uniform):
+
+Data/stat cards: 4px
+Buttons/interactive controls: 6px
+Modals/panels/large containers: 16px
+Avatars/Robloxian renders: fully round or 20px squircle
+Leaderboard/table rows: 0px
 
 
-Start by proposing the backend's data model and the plugin's file/module structure before writing code, so I can sanity check the plan.
+
+Color palette:
+
+Background: #0B1210 (near-black, green undertone)
+Primary accent: #2DE1C2 (teal — live indicators, CTAs)
+Risk/negative accent: #FF6B4A (coral — churn, deaths, warnings)
+Positive accent: #7FD9A8 (sea-glass green)
+Surface/card: #131C1A
+User-chosen accent color (set in Locker) overrides/tints community-side UI per-profile
+
+
+
+Typography: mono or semi-mono face for headers/numbers (e.g. Space Mono, JetBrains Mono — ties to "data tool" identity), clean grotesque (Inter, General Sans) for body text. Numbers use tabular figures, slightly heavier weight — stats are hero content.
+Signature motif: a consistent small animated "pulse" indicator (dot/waveform) used anywhere something is live — Live Feed, Live Config active variables, online player count, "currently playing" status. One consistent style, used everywhere, ties the whole product together.
+
+
+3. Onboarding reorder
+
+Identity before credentials — restructure the signup flow to:
+
+
+Pick username (the @handle, shown live as typed)
+Build Robloxian — link Roblox account (resolve username → UserId → render real avatar via Roblox's public avatar thumbnail endpoint, pull display name) OR build a custom character (simple avatar builder: body, colors, accessories)
+Pick accent color — becomes the color of their profile, posts, and card borders throughout the platform
+
+
+— identity is now locked in; only now does the paywall/credentials step happen —
+
+
+Email + password + one-time payment (Founding Member unlock)
+Optional, skippable, revisit-anytime: bio, external links, badge showcase, studs background, linked experience/game, community tags
+
+
+4. Locker (profile) UI
+
+
+Accent-colored card layout matching the reference mockup's energy (bold color blocks, chunky shadows, playful proportions)
+Background customization: solid accent color OR a studs-texture pattern (actual Roblox baseplate stud pattern, SVG/CSS, tintable to accent color) — build this as a real toggleable option, not a static image
+Pinned badge slot next to username (like a Discord flair)
+Badge trophy-case display — shelf/case visual treatment, not a flat list
+Bio, external links (game page, socials, Discord)
+Stat showcase section — placeholder cards only in this phase (live wiring is Phase 2), but build the card shapes, sizing options, and layout now
+Comment box, like/repost icons, and buttons on the profile all skin to the user's accent color
+
+
+5. Community post cards (Connect)
+
+
+Accent-colored per author, matching their profile color
+Roblox-style chunky like/dislike/comment icons (not generic heart icons) — pull the visual language from the reference mockup
+Comment input field styled to match reference mockup (rounded pill input, colored send button)
+Support layout for attaching a "stat card" to a post — build the card component and size variants (mini / standard / full) now, wire to live data in Phase 2
+
+
+6. Badge visual system
+
+
+Two distinct visual treatments: evergreen badges (standard style) and seasonal badges (distinct border/glow treatment so they read as time-limited at a glance)
+"Ghost" outline state for a seasonal badge a user missed (visible in a badge-history view, not earnable, purely for FOMO/visibility)
+Badge case UI supports both types side by side, visually distinguishable at a glance
+
+
+7. Fun Page UI
+
+
+Leaderboard rows styled flat (0px radius per token system) — reads like a scoreboard/ledger
+Distinct "record board" visual treatment (more card-like, 16px radius, celebratory styling) for standout single-record stats (most expensive item, longest session, biggest purchase spike) — separate visually from routine ongoing leaderboards
+
+
+8. Team profile UI
+
+
+Visually distinct from individual profiles — separate accent color slot, team badge case (team-earned badges, not individual), toggle for posting "as the team" vs "as yourself"
+
+
+9. Section-specific empty/loading states
+
+
+Design empty states for Play (no linked games yet), Connect (empty feed for new users), Workshop (no project yet), Locker (before Robloxian is built) — each written in the interface's voice, telling the user what to do next, not just "nothing here yet"
+
+
+No backend/API integration in this phase. All data shown is mock/placeholder.
+
+
+PHASE 2 — Functionality
+
+Wire real data and logic behind the Phase 1 UI, and build all backend-only systems (SDK, telemetry, admin tools).
+
+A. Core player tracking (SDK + backend)
+
+
+Log all events keyed by Roblox UserId only — never username, display name, or other PII
+Session-level tracking: start/end timestamps, session length, tie existing join/leave events to UserId
+New event type PlayerSessionSnapshot: periodic lightweight state (position/zone, progress markers) so a session can be replayed as a timeline
+New player_sessions table: UserId, session_id, start/end time, event timeline (FK to events table)
+Data retention job: auto-purge session-level data after a configurable window (default 90 days), preserve aggregated/anonymized metrics indefinitely
+Per-project setting for retention window
+Schema comments documenting UserId-only tracking, no cross-session PII merge, no external identity resolution
+DATA_POLICY.md at repo root: UserId-only tracking, no PII, default 90-day purge, dev responsible for their own compliance with Roblox Developer Terms / Data Processing Terms
+One-line disclosure + link in plugin Setup tab at integration time
+
+
+B. Player Lookup (Workshop, paid tier)
+
+
+Search by UserId, full session history, chronological event timeline
+All custom events (BlockPlaced, NearDeath, PurchaseAttempt, etc.) shown as a timeline
+Dev-defined trigger rules (condition builder: event + threshold → auto-tag), display of which rules fired for this player and when
+Auto-generated behavioral tags: Whale, Churn Risk, Power User, First-Time-Quit, Rage Quit (rapid death+leave pattern)
+Funnel position at last session (tied to dev-defined custom funnels, see F)
+Inline cohort-average comparison ("40% below cohort avg session length")
+Per-player event-frequency heatmap
+Manual dev notes/flags field
+Trigger-to-action shortcut: flag player for dev follow-up (message/reward push if in scope, otherwise a dev-facing flag)
+Timeline scrubber: visual session replay by event density, click to jump to spikes
+
+
+C. Cohort Replay (Workshop, free tier)
+
+
+Group sessions by cohort (join date range, version tag), bridging individual and aggregate views
+Gate boundary: individual Player Lookup + churn/whale tags = paid; cohort aggregates = free
+
+
+D. Competitor tracking
+
+
+Free teaser: gap to similar games on a headline metric ("3 similar survival games launched this week, avg D1 42% vs your 31%")
+Paid: funnel breakdown of why competitors outperform
+
+
+E. Alerts
+
+
+Discord/email alerts on significant metric changes ("Your D1 retention dropped 8% this week")
+Configurable thresholds per project
+
+
+F. Custom funnels
+
+
+Dev-defined funnel steps tied to their own mechanics (e.g. "collected first block → placed first block → survived first tide")
+Feeds Player Lookup funnel position and general funnel-drop analytics
+
+
+G. Percentile benchmarking (roadmap-gated, v2)
+
+
+"Your D1 is in the Xth percentile for [genre]" — gated until minimum aggregate dev count is reached
+Build the FOMO messaging/roadmap UI now even though the feature itself is locked
+
+
+H. Free tier limit
+
+
+Free tier: full feature access, retention/analytics history capped at 7 days
+Paid: full history
+
+
+I. Spatial analytics
+
+
+Death heatmap: 3D coordinates of player deaths overlaid on the map in Studio
+Quit-location tracking: where a player was standing when they rage-quit or went idle-then-left
+Movement/path heatmaps: common paths, stuck points, backtracking
+Time-spent-per-zone: dead-space detection
+
+
+J. Causal / correlation analytics
+
+
+Churn-prediction engine: auto-correlate custom event sequences that precede quitting
+Build-version diffing: auto-compare retention/funnel metrics before vs after each game update
+Performance correlation: FPS/lag spikes correlated with churn location and timing
+
+
+K. Economy analytics
+
+
+Currency sink/source flow tracking
+Item-level analytics: purchased-but-unused, hoarded, refunded-in-spirit items
+
+
+L. Social analytics
+
+
+Friend-join effects on retention (solo vs party session length/retention comparison)
+Rage-pattern detection: rapid deaths + erratic camera input as an automatic "frustration" signal
+
+
+M. Live Config (new plugin tab: "Live Config")
+
+
+Dev defines variables in the plugin: text, image asset ID, number, boolean (e.g. WelcomeMessage, EventBannerImage, SpawnRate)
+SDK pulls values at runtime via HttpService/MemoryStore — no republish required
+Analytics-triggered config: rules like "if D1 retention drops below X, auto-swap SpawnRate" — driven by the same trigger engine as Player Lookup tags
+A/B testing: assign cohorts to different variable values, tie results back to dashboard metrics
+Scheduled/event-based variable pushes
+Version history + one-click rollback on every variable
+In-Studio visual preview of image/text variables before pushing live
+
+
+N. Studio Plugin UX polish
+
+
+Hover-triggered "Copy" buttons on any code/snippet box across all tabs (Setup, Event Builder, Live Feed, Live Config) — appears on hover, copies to clipboard, brief confirmation state
+Event Builder: "All Events" view listing every event the dev has created (past and current), with edit/delete actions; deleting should allow removing individual properties from within the editor, not just the whole event
+
+
+O. Fun Page (Workshop → surfaces on dashboard)
+
+
+Live leaderboards: richest players (currency), top spenders (real-money), most expensive item purchased + buyer, best-selling item, most-hoarded item, longest single session, most deaths, fastest funnel completion, most loyal player (longest retention streak)
+Server records: peak concurrent players, biggest single purchase spike
+
+
+P. Custom leaderboards
+
+
+Dev defines a leaderboard in the plugin (name + tracked stat) using the same no-code Event Builder pattern
+SDK auto-generates the Luau snippet + plain-English paste instructions
+Leaderboard shows on the dashboard Fun Page and optionally in-game
+Devs can mark leaderboards public (visible to players in-game) or dashboard-only
+
+
+Q. Live Admin Panel
+
+
+Toggle-enable live admin tools (kick, ban, teleport, grant item, adjust currency) from the web dashboard while the game is live
+Secure, scoped, revocable shareable link for granting admin access to a collaborator without full dashboard login
+Action audit log: every admin action logged (who, what, when)
+Link expiration/revocation control
+
+
+R. Customizable analytics (Workshop)
+
+
+Dashboard becomes a card grid: add, remove, reorder, resize
+Per-card visual "skins" (e.g. a retention curve can render as a standard line chart or a themed "tide gauge" visual) — selectable per card, not global
+User's Locker accent color carries into card borders/highlights (subtle)
+Density setting: Compact / Standard / Showcase
+
+
+S. Stat cards in posts (Connect)
+
+
+Attach a live stat card to a post: pick the metric (DAU, retention, leaderboard record, Fun Page stat, etc.)
+Size options: mini (number + label), standard (number + sparkline), full (embedded mini-chart)
+Decide and implement snapshot-at-post-time behavior (recommended) rather than live-updating numbers on old posts, to avoid confusing viewers
+Cards inherit the poster's accent color
+
+
+T. Team projects (Workshop)
+
+
+Projects support multiple linked devs, not just a single owner
+Role-based permissions: owner, editor, viewer
+Shared access to dashboard, Live Config, and Player Lookup scoped by role
+Team profile page: separate accent color, team badge case, "post as team" vs "post as yourself" toggle
+
+
+U. Player-facing communities (Play + Connect)
+
+
+Each linked game gets an auto-created community space (per-game chat/feed, like a subreddit per game)
+Devs get a distinguishing badge/color when posting in their own game's space
+Opt-in "currently playing" status surfaces on a player's profile and in Play
+Dev-to-player contact is opt-in and rate-limited on the dev's side (devs can disable DMs entirely or restrict to in-thread replies) — do not allow fully open unrestricted DMs from any player to any dev; build the guardrail into this phase, not as a later patch
+
+
+V. Game-list seeding (Play)
+
+
+Auto-seed a player's "games you play" list at onboarding from Roblox's public badges-owned and favorited-games data (no OAuth required)
+Allow manual self-report editing/addition of games
+Live presence lookup for "who's online now" within Play
+For games running the Studs SDK, use verified in-game account linking as the most accurate signal, feeding into both Play presence and per-game community membership
+
+
+W. Seasonal badges
+
+
+Season-based badge drops (quarterly, or aligned to a chosen event calendar)
+Badges retire at season end and cannot be earned late
+Mix of pure-participation badges and usage-tied badges (e.g. "used Player Lookup 20 times this season," "ran an A/B test this season") so seasons nudge feature discovery, not just vanity collection
+Manually-awardable badges (e.g. "Featured Dev," "Helpful") assignable by admins, separate from auto-earned badges
+End-of-season recap card: auto-generated, shareable summary (badges earned, biggest retention win, most active week, standout Fun Page record) in a Spotify-Wrapped-style format
+
+
+X. Belonging/retention features
+
+
+New-member "Joined this week" tag, visible for a few days
+Rotating "New Dev Spotlight" on the Fun Page
+Personal build-log tab on own profile (private by default, can be made public)
+Login/check-in streak tracking
+"Devs like you" suggestions on first login, based on community tags/genre
+Login check-in strip ("3 devs posted since you were last here")
+Anniversary badge/moment (e.g. "1 year building")
+Avoid raw popularity leaderboards of people as a primary status signal — badges, seasonal participation, and the trophy case should carry status instead, so new members aren't discouraged from posting
+
+
+
+Build order within Phase 2 is flexible, but player tracking (A) should land first since Player Lookup, custom funnels, Live Config triggers, and Fun Page all depend on it.
   <div class="podium">
 
     <!-- SILVER (left) -->
