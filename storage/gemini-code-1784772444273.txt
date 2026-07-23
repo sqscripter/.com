@@ -1,0 +1,31 @@
+Create a sleek, luxury dark-mode web application interface for an AI-powered AR mirror platform called "MIRROR".
+
+Context & Aesthetic:
+- Platform: Web Application (Desktop Viewport)
+- Vibe: Ultra-premium, editorial, clean, high-tech, luxury (inspired by Apple and Aesop design languages).
+- Color Palette: Deep obsidian black background (#050608), dark slate containers (#0f1218), crisp white text, hairline white borders (rgba(255,255,255,0.08)), and extremely subtle warm silver accents. Strictly avoid neon purple or bright glowing gradients.
+- Typography: Modern sans-serif headings with high contrast paired with uppercase monospaced text for technical diagnostic indicators.
+
+Page Structure & Section Details:
+
+1. Top Navigation Bar:
+- Left: Minimalist wordmark "MIRROR" with a crisp white circular dot logo.
+- Center: A floating, rounded revision pill input bar with placeholder text: "Revise haircut (e.g., 'Make fringe 1 inch shorter' or 'Add side taper')..." with a small "Apply Edit" button on the right inside the pill.
+- Right: Technical status indicator pill reading "AR MESH: ACTIVE (60 FPS)".
+
+2. Centered Left Dock (Toolbar):
+- A vertical floating toolbar centered on the left edge of the screen.
+- Minimalist line icons for: Hair, Makeup, Style, Compare. Active state should be a subtle slate box highlight.
+
+3. Central Mirror Viewport (Main View):
+- Full-screen live video container representing the AR mirror feed.
+- Overlay Feature (AR Lead Callout): A minimal target dot on the user's hair connected by a razor-thin diagonal line to a floating glass card that reads: "Custom Texture Step: Pinch roots upward while damp with Texturizing Dust."
+
+4. Centered Modal Window (Product Setup Overlay):
+- A centered dark-glass popup card titled "Setup Your Tutorial Tools".
+- Subtitle: "Select what you have on hand. MIRROR will automatically rewrite the tutorial steps for your setup."
+- Checklist Rows:
+  - Row 1 (Checked): Blow Dryer with Nozzle
+  - Row 2 (Unchecked / Red Alert): "Sea Salt Spray — Missing". Directly underneath, an input field reading: "+ Add alternative you own (e.g., Texturizing Dust, Mousse)..."
+  - Row 3 (Checked): Matte Styling Clay
+- Bottom Action Button: Full-width solid white button with dark text reading "Generate Custom Routine".
