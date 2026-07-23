@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Out of Range — Global Field Atlas</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8C%B2%3C/text%3E%3C/svg%3E">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+
+<style>
+  :root{
+    --paper: #EDE6D3;
+    --paper-dark: #E4DBC3;
+    --paper-line: rgba(35,48,29,0.14);
+    --ink: #23301D;
+    --ink-soft: #5B6350;
+    --moss: #3F5C34;
+    --moss-deep: #2C4224;
+    --brass: #9C7A34;
+    --card: #F6F1E4;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; height:100%; }
+  body{
+    font-family: 'Inter', sans-serif;
+    color: var(--ink);
+    background: var(--paper);
+    overflow: hidden;
+  }
+  h1,h2,h3{ font-family:'Fraunces', Georgia, serif; margin:0; }
+  .mono{ font-family:'JetBrains Mono', monospace; }
+
+  #app{ display:flex; height:100vh; width:100vw; }
+
+  .sidebar{
+    width: 390px;
+    flex-shrink: 0;
+    background: var(--paper-dark);
+    border-right: 1px solid var(--paper-line);
+    display:flex;
+    flex-direction: column;
+    z-index: 500;
+  }
+
+  .sidebar-header{
+    padding: 20px 22px 14px;
+    border-bottom: 1px solid var(--paper-line);
+  }
+
+  .brand h1{ font-size: 22px; font-weight: 700; line-height:1.1; }
+  .brand .eyebrow{
+    font-family:'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase;
+    color: var(--brass); display:block; margin-bottom:2px;
+  }
+
+  .tagline{ margin-top: 8px; font-size: 12px; line-height: 1.45; color: var(--ink-soft); }
+
+  /* Filters */
+  .filter-section{
+    padding: 12px 22px;
+    background: rgba(0,0,0,0.03);
+    border-bottom: 1px solid var(--paper-line);
+  }
+  .filter-label{ font-size: 10.5px; font-weight:700; text-transform:uppercase; letter-spacing:0.8px; color: var(--ink-soft); margin-bottom:8px; display:block; }
+  .status-pills{ display:flex; gap:6px; flex-wrap:wrap; }
+  .status-pill{
+    font-size: 11px; font-weight:600; padding: 4px 10px; border-radius: 999px;
+    background: var(--card); border: 1px solid var(--paper-line); cursor:pointer;
+    display:flex; align-items:center; gap:5px; user-select:none;
+  }
+  .status-pill input{ margin:0; accent-color: var(--moss); cursor:pointer; }
+
+  .action-row{ display:flex; gap: 8px; margin-top: 10px; }
+  .btn{
+    font-size: 11px; font-weight: 600; padding: 5px 10px; border-radius: 999px;
+    border: 1px solid var(--moss); background: transparent; color: var(--moss-deep); cursor:pointer;
+  }
+  .btn:hover{ background: var(--moss); color: #fff; }
+
+  .sidebar-scroll{ flex:1; overflow-y:auto; padding: 8px 12px 18px; }
+  .sidebar-scroll::-webkit-scrollbar{ width:6px; }
+  .sidebar-scroll::-webkit-scrollbar-thumb{ background: var(--paper-line); border-radius: 6px; }
+
+  .species-row{
+    display:flex; align-items:flex-start; gap: 10px;
+    padding: 9px 8px; border-radius: 8px; cursor:pointer;
+  }
+  .species-row:hover{ background: rgba(255,255,255,0.5); }
+  .species-row input[type=checkbox]{ margin-top: 3px; cursor:pointer; }
+  .swatch{ width:12px; height:12px; border-radius:50%; margin-top:3px; flex-shrink:0; border:1px solid rgba(0,0,0,0.2); }
+  .species-text{ flex:1; min-width:0; }
+  .species-name-row{ display:flex; justify-content:space-between; align-items:baseline; }
+  .species-name{ font-size: 13px; font-weight:600; }
+  .species-count{ font-size: 10px; background: rgba(0,0,0,0.06); padding: 1px 5px; border-radius: 8px; }
+  .species-latin{ font-style: italic; font-size: 11px; color: var(--ink-soft); }
+  .species-pop{ font-size: 10.5px; color: var(--moss-deep); margin-top:2px; }
+
+  #map{ flex:1; position:relative; background: #E5E3DF; }
+
+  /* Popup Formatting */
+  .leaflet-popup-content-wrapper{ background: var(--card); border-radius: 10px; }
+  .leaflet-popup-content{ margin: 14px; width: 270px !important; }
+  .pop-eyebrow{ font-family:'JetBrains Mono', monospace; font-size: 9px; letter-spacing:1px; text-transform: uppercase; color: var(--brass); }
+  .pop-name{ font-family:'Fraunces', serif; font-weight:700; font-size:16px; margin-top:1px; }
+  .pop-latin{ font-style:italic; font-size:11px; color:var(--ink-soft); }
+  .pop-badge{ display:inline-block; margin-top:6px; font-size:10px; font-weight:700; padding:2px 7px; border-radius:4px; text-transform:uppercase; }
+  .badge-alive{ background:#E2F0D9; color:#276A10; }
+  .badge-dead{ background:#FCE4D6; color:#C65911; }
+  .badge-approx{ background:#FFF2CC; color:#8C6B00; }
+  .pop-record{ font-size:11px; font-weight:600; color:var(--brass); margin-top:6px; }
+  .pop-blurb{ font-size:12px; line-height:1.4; margin-top:6px; }
+  .pop-meta{ margin-top:10px; padding:8px; background:rgba(0,0,0,0.04); border-radius:6px; font-size:11px; }
+  .pop-wiki{ display:inline-block; margin-top:4px; font-weight:600; color:var(--moss-deep); text-decoration:none; }
+  .pop-wiki:hover{ text-decoration:underline; }
+
+  @media (max-width: 800px){
+    #app{ flex-direction: column; }
+    .sidebar{ width:100%; height: 50vh; }
+  }
+</style>
+</head>
+<body>
+
+<div id="app">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="brand">
+        <span class="eyebrow">JavaScript File Atlas</span>
+        <h1>Out of Range</h1>
+      </div>
+      <p class="tagline">Data loaded directly from <code>trees.js</code> file.</p>
+    </div>
+
+    <div class="filter-section">
+      <span class="filter-label">Tree Status Filters</span>
+      <div class="status-pills">
+        <label class="status-pill"><input type="checkbox" id="chkAlive" checked> 🟢 Alive</label>
+        <label class="status-pill"><input type="checkbox" id="chkDead" checked> 🔴 Dead / Historic</label>
+        <label class="status-pill"><input type="checkbox" id="chkApprox" checked> 🟡 Approx / Secret</label>
+      </div>
+      <div class="action-row">
+        <button class="btn" id="btnAll">Select All</button>
+        <button class="btn" id="btnNone">Clear All</button>
+      </div>
+    </div>
+
+    <div class="sidebar-scroll" id="speciesList"></div>
+  </aside>
+
+  <main id="map"></main>
+</div>
+
+<!-- Load dataset file directly -->
+<script src="trees.js"></script>
+
+<script>
+const map = L.map('map', { worldCopyJump:true }).setView([25, 10], 2);
+
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  maxZoom: 19,
+  attribution: '&copy; OpenStreetMap'
+}).addTo(map);
+
+const markerGroup = L.layerGroup().addTo(map);
+
+function renderSidebar(){
+  const speciesList = document.getElementById('speciesList');
+  speciesList.innerHTML = '';
+
+  Object.keys(TREE_DATA.categories).forEach(key => {
+    const cat = TREE_DATA.categories[key];
+    const count = TREE_DATA.trees.filter(t => t.cat === key).length;
+
+    const row = document.createElement('label');
+    row.className = 'species-row';
+    row.innerHTML = `
+      <input type="checkbox" data-cat="${key}" checked style="accent-color:${cat.color}">
+      <span class="swatch" style="background:${cat.color}"></span>
+      <span class="species-text">
+        <div class="species-name-row">
+          <span class="species-name">${cat.name}</span>
+          <span class="species-count mono">${count}</span>
+        </div>
+        <div class="species-latin">${cat.latin}</div>
+        <div class="species-pop">${cat.population}</div>
+      </span>
+    `;
+    speciesList.appendChild(row);
+  });
+
+  document.querySelectorAll('.filter-section input, #speciesList input').forEach(input => {
+    input.addEventListener('change', renderMap);
+  });
+
+  document.getElementById('btnAll').onclick = () => setAllSpecies(true);
+  document.getElementById('btnNone').onclick = () => setAllSpecies(false);
+}
+
+function setAllSpecies(state){
+  document.querySelectorAll('#speciesList input').forEach(cb => cb.checked = state);
+  renderMap();
+}
+
+function renderMap(){
+  markerGroup.clearLayers();
+
+  const showAlive = document.getElementById('chkAlive').checked;
+  const showDead = document.getElementById('chkDead').checked;
+  const showApprox = document.getElementById('chkApprox').checked;
+
+  const activeCats = Array.from(document.querySelectorAll('#speciesList input:checked'))
+                          .map(cb => cb.dataset.cat);
+
+  const filteredTrees = TREE_DATA.trees.filter(t => {
+    if(!activeCats.includes(t.cat)) return false;
+    if(t.status === 'alive' && !showAlive) return false;
+    if(t.status === 'dead' && !showDead) return false;
+    if(t.status === 'approx' && !showApprox) return false;
+    return true;
+  });
+
+  filteredTrees.forEach(t => {
+    const cat = TREE_DATA.categories[t.cat];
+    
+    let fillColor = cat.color;
+    let strokeColor = '#1E2B18';
+    let dashArray = null;
+    let opacity = 0.9;
+
+    if(t.status === 'dead'){
+      fillColor = '#808080';
+      dashArray = '2,2';
+      opacity = 0.7;
+    } else if(t.status === 'approx'){
+      dashArray = '3,3';
+    }
+
+    const marker = L.circleMarker([t.lat, t.lng], {
+      radius: t.record ? 8 : 6,
+      weight: 1.8,
+      color: strokeColor,
+      fillColor: fillColor,
+      fillOpacity: opacity,
+      dashArray: dashArray
+    });
+
+    const statusLabel = t.status === 'dead' ? '🔴 Dead / Felled' : (t.status === 'approx' ? '🟡 Secret / Approx' : '🟢 Verified Alive');
+    const badgeClass = t.status === 'dead' ? 'badge-dead' : (t.status === 'approx' ? 'badge-approx' : 'badge-alive');
+
+    const popupHtml = `
+      <div class="pop-eyebrow">${cat.name}</div>
+      <div class="pop-name">${t.name}</div>
+      <div class="pop-latin">${cat.latin}</div>
+      <div><span class="pop-badge ${badgeClass}">${statusLabel}</span></div>
+      <div style="font-size:11px; margin-top:5px; color:#555;">📍 ${t.place}</div>
+      ${t.record ? `<div class="pop-record">${t.record}</div>` : ''}
+      <div class="pop-blurb">${t.blurb}</div>
+      <div class="pop-meta">
+        <div><strong>Est. Pop:</strong> ${cat.population}</div>
+        <a class="pop-wiki" href="${cat.wiki}" target="_blank">Wikipedia Article ↗</a>
+      </div>
+      <div class="mono" style="font-size:9.5px; color:#888; margin-top:5px;">${t.lat.toFixed(4)}, ${t.lng.toFixed(4)}</div>
+    `;
+
+    marker.bindPopup(popupHtml);
+    marker.addTo(markerGroup);
+  });
+}
+
+// Initial Run
+renderSidebar();
+renderMap();
+</script>
+</body>
+</html>
